@@ -23,4 +23,21 @@ This project is under development, please stay informed.
 
 ## Contribute
 
-Contribution is always welcomed, please check the [Contributing Guideline](https://github.com/jingedawang/StockPredictor/blob/main/CONTRIBUTING.md) for more details.
+### What can I contribute?
+
+It's always welcomed to join us as a developer. Please check [Stock Prediction](https://github.com/users/jingedawang/projects/2) project and see what you could do.
+
+Currently, we are in Iteration Hachthon (8/15/2022 to 9/26/2022).
+Our first goal is to develop an initial version of StockPredictor, which could tell us how much the price will be in the next two weeks.
+
+If you don't like our development plan but have good ideas about this project, please create an issue.
+We are happy to merge good implementations.
+
+### Resources
+
+If you are interested in stock prediction model, there are several resources. The first two should be read carefully.
+The third one is the video records of AI school course which teaching the theories of stock models and how to use them.
+
++ Machine learning framework for stock: [microsoft/qlib](https://github.com/microsoft/qlib)
++ Documentation of Qlib: [Qlib Documentation](https://qlib.readthedocs.io/en/latest/index.html)
++ Course in AI School: [AI + Stock](https://microsoftapc-my.sharepoint.com/:f:/g/personal/jingewang_microsoft_com/EoHHzyc1dRJMvt-b1QgOBS8BENFA4ZXvMUpgnWukliyh1Q?e=4CwYaS)
