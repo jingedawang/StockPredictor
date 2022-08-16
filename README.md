@@ -23,4 +23,4 @@ This project is under development, please stay informed.
 
 ## Contribute
 
-Contribution is always welcomed, please check the [Contributing Guideline]() for more details.
+Contribution is always welcomed, please check the [Contributing Guideline](https://github.com/jingedawang/StockPredictor/blob/main/CONTRIBUTING.md) for more details.
