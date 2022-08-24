@@ -1,3 +1,4 @@
+import datetime
 from flask import Flask
 import logging
 
@@ -44,6 +45,20 @@ def get_stock_list():
         A JSON string including all the stocks in the market.
     """
     return service.get_stock_list()
+
+@app.route('/stock/<id>')
+def predict(id: str):
+    """
+    Predict the stock price after 2 weeks.
+
+    Args:
+        id: The id of the stock, which is a 6-digit number.
+
+    Returns:
+        The history prices and the predicted price for the stock.
+    """
+    today = datetime.date.today().strftime('%Y-%m-%d')
+    return service.get_history_and_predict_result(id, today)
 
 if __name__ == '__main__':
    app.run()
