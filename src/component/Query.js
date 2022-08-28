@@ -12,20 +12,22 @@ export function Query() {
     };
     
     const Stocks = [
-        { id: 10013, name: "stock1"},
-        { id: 10011, name: "stock2"},
-        { id: 20022, name: "stock3"},
-        { id: 31213, name: "stock4"},
-        { id: 30024, name: "stock5"},
-        { id: 43219, name: "stock6"},
-        { id: 40090, name: "stock7"},
-        { id: 56111, name: "stock8"},
-        { id: 56233, name: "stock9"},
-        { id: 70028, name: "stock10"},
-        { id: 88888, name: "stock11"},
-        { id: 10000, name: "stock12"},
-        { id: 90000, name: "stock13"}
-    ];
+      {
+          id: "600479",
+          pinyin: "QJYY",
+          name: "千金药业"
+      },
+      {
+          id: "600480",
+          pinyin: "LYGF",
+          name: "凌云股份"
+      },
+      {
+          id: "600481",
+          pinyin: "SLJN",
+          name: "双良节能"
+      }
+  ];
     
     const data = [
         {"date": '20210812', "value": '0.37'},
@@ -38,6 +40,7 @@ export function Query() {
         {"date": '20210819', "value": '0.32'},
         {"date": '20210820', "value": '0.38'},
         {"date": '20210821', "value": '0.35'},
+        {"date": '20210831', "value": '0.51'},
     ];
     
     const column = data && data.map(item => Number(item.value)).sort();
@@ -61,6 +64,7 @@ export function Query() {
 
     
     function Result(props) {
+      const length = data.length;
       useEffect(() => {
         const myChart = echarts.init(document.getElementById("charts"));
         myChart.setOption({
@@ -74,13 +78,47 @@ export function Query() {
           yAxis: {
             type: 'value'
           },
+          visualMap: {
+            show: false,
+            dimension: 0,
+            pieces: [
+              {
+                lte: 1,
+                color: "#23CD00"
+              },
+              {
+                gt: 1,
+                lte: length - 2,
+                color: "#23CD00"
+              },
+              {
+                gt: length - 2,
+                color: 'red',
+              }
+            ]
+          },
           series: [
             {
               name: "price",
               type: "line",
               smooth: true,
-              color: "#23CD00",
               data: props.data.map((i) => i.value),
+              markArea: {
+                itemStyle: {
+                  color: 'rgba(255, 173, 177, 0.4)'
+                },
+                data: [
+                  [
+                    {
+                      name: 'Forecast after Two Weeks',
+                      xAxis: data[length - 2].date
+                    },
+                    {
+                      xAxis: data[length - 1].date
+                    }
+                  ]
+                ]
+              }
             },
           ],
         });
@@ -100,9 +138,9 @@ export function Query() {
                 placeholder="Select your stock"
                 optionFilterProp="label"
                 onSelect={onSelect}
-                filterOption={(input, option) => (option.children.toLowerCase().includes(input.toLowerCase()) || option.value.toString().includes(input))}
+                filterOption={(input, option) => (option.value.toLowerCase().includes(input.toLowerCase()) || option.children.includes(input)) }
             >
-                { Stocks && Stocks.map(stock => <Option value={stock.id}>{stock.name}</Option>)}
+                { Stocks && Stocks.map(stock => <Option value={stock.pinyin} key={stock.id}>{stock.name}</Option>)}
             </Select>
             { data && data.length ? <Result data={data} scale={scale}/> : null }
         </Card>
