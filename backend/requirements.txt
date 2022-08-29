@@ -1,3 +1,4 @@
+baostock~=0.8.8
 dataclasses_json~=0.5.7
 Flask~=2.0.2
 pypinyin~=0.47.1
