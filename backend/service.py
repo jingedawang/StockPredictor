@@ -51,8 +51,8 @@ def get_stock_list() -> str:
     database = TinyDB(STOCK_DATABASE)
     stocks = []
     for row in database.all():
-        # Only return following 3 fields for the request.
-        keep = ['id', 'pinyin', 'name']
+        # Only return following 4 fields for the request.
+        keep = ['id', 'pinyin', 'name', 'enname']
         filtered_stock_json = {key: row[key] for key in keep}
         stocks.append(filtered_stock_json)
     return json.dumps(stocks, ensure_ascii=False)
@@ -80,8 +80,8 @@ def get_history_and_predict_result(id: str, date: str) -> str:
     # Get history prices.
     recent_40_trading_days = qlib.data.D.calendar(start_time='2008-01-01', end_time=date)[-40:]
     history_data = qlib.data.D.features([qlib_id], ['$close/$factor'], recent_40_trading_days[0].strftime('%Y-%m-%d'), date)
-    history = [{key[1].strftime('%Y-%m-%d'): value} for key, value in history_data.to_dict()['$close/$factor'].items()]
-    stock = Stock(id, matched_rows[0]['pinyin'], matched_rows[0]['name'], qlib_id, history=history)
+    history = [{key[1].strftime('%Y-%m-%d'): round(value, 2)} for key, value in history_data.to_dict()['$close/$factor'].items()]
+    stock = Stock(id, matched_rows[0]['pinyin'], matched_rows[0]['name'], qlib_id, enname=matched_rows[0]['enname'], history=history)
 
     # Get predicted price.
     # TODO: Get predicted price.
