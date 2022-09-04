@@ -29,19 +29,22 @@ def get_stock_list():
     The format of the returned JSON should look like:
     [
         {
-            "id": "600479",
-            "pinyin": "QJYY",
-            "name": "千金药业"
+            "id": "000001",
+            "pinyin": "PAYH",
+            "name": "平安银行",
+            "enname": "Ping An Bank Co., Ltd."
         },
         {
-            "id": "600480",
-            "pinyin": "LYGF",
-            "name": "凌云股份"
+            "id": "000002",
+            "pinyin": "WKA",
+            "name": "万科A",
+            "enname": "China Vanke Co.,Ltd."
         },
         {
-            "id": "600481",
-            "pinyin": "SLJN",
-            "name": "双良节能"
+            "id": "000004",
+            "pinyin": "GNKJ",
+            "name": "国农科技",
+            "enname": "Shenzhen Cau Technology Co.,Ltd."
         }
     ]
 
@@ -54,6 +57,30 @@ def get_stock_list():
 def predict(id: str):
     """
     Predict the stock price after 2 weeks.
+
+    The format of the returned JSON should look like:
+    {
+        "id": "600000",
+        "pinyin": "PFYH",
+        "name": "浦发银行",
+        "qlib_id": "SH600000",
+        "enname": "Shanghai Pudong Development Bank Co.,Ltd.",
+        "history": [
+            {
+                "2022-08-30": 7.19
+            },
+            {
+                "2022-08-31": 7.27
+            },
+            {
+                "2022-09-01": 7.23
+            },
+            {
+                "2022-09-02": 7.21
+            }
+        ],
+        "predict": 7.33
+    }
 
     Args:
         id: The id of the stock, which is a 6-digit number.
@@ -68,6 +95,30 @@ def predict(id: str):
 def predict_in_date(id: str, date: str):
     """
     Predict the stock price after 2 weeks from the specified date.
+
+    The format of the returned JSON should look like:
+    {
+        "id": "600000",
+        "pinyin": "PFYH",
+        "name": "浦发银行",
+        "qlib_id": "SH600000",
+        "enname": "Shanghai Pudong Development Bank Co.,Ltd.",
+        "history": [
+            {
+                "2020-05-07": 10.39
+            },
+            {
+                "2020-05-08": 10.44
+            },
+            {
+                "2020-05-11": 10.43
+            },
+            {
+                "2020-05-12": 10.34
+            }
+        ],
+        "predict": 10.21
+    }
 
     Args:
         id: The id of the stock, which is a 6-digit number.

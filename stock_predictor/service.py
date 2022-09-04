@@ -5,6 +5,7 @@ import pypinyin
 import qlib.data
 from tinydb import TinyDB, Query
 
+import predict
 from stock import Stock
 
 
@@ -81,9 +82,10 @@ def get_history_and_predict_result(id: str, date: str) -> str:
     recent_40_trading_days = qlib.data.D.calendar(start_time='2008-01-01', end_time=date)[-40:]
     history_data = qlib.data.D.features([qlib_id], ['$close/$factor'], recent_40_trading_days[0].strftime('%Y-%m-%d'), date)
     history = [{key[1].strftime('%Y-%m-%d'): round(value, 2)} for key, value in history_data.to_dict()['$close/$factor'].items()]
-    stock = Stock(id, matched_rows[0]['pinyin'], matched_rows[0]['name'], qlib_id, enname=matched_rows[0]['enname'], history=history)
 
     # Get predicted price.
-    # TODO: Get predicted price.
+    predicted_price = predict.predict(qlib_id, date)
 
+    # Create Stock object and convert it to json string
+    stock = Stock(id, matched_rows[0]['pinyin'], matched_rows[0]['name'], qlib_id, enname=matched_rows[0]['enname'], history=history, predict=predicted_price)
     return stock.to_json(ensure_ascii=False)
