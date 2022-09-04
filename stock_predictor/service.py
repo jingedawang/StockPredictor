@@ -20,7 +20,7 @@ def load_stock_list():
     os.makedirs(os.path.dirname(STOCK_DATABASE), exist_ok=True)
     database = TinyDB(STOCK_DATABASE)
 
-    stock_list = pandas.read_csv(os.path.dirname(__file__) + '/stock_list.csv')
+    stock_list = pandas.read_csv(os.path.dirname(__file__) + '/../data/stock_list.csv')
     for index, row in stock_list.iterrows():
         id = row['ts_code'][:-3]
         name = row['name']
