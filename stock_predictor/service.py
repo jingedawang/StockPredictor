@@ -88,5 +88,5 @@ def get_history_and_predict_result(id: str, date: str) -> str:
     #predicted_price = predict.predict(qlib_id, date)
 
     # Create Stock object and convert it to json string
-    stock = Stock(id, matched_rows[0]['pinyin'], matched_rows[0]['name'], qlib_id, enname=matched_rows[0]['enname'], history=history, predict=predicted_price)
+    stock = Stock(id, matched_rows[0]['pinyin'], matched_rows[0]['name'], qlib_id, enname=matched_rows[0]['enname'], history=history)
     return stock.to_json(ensure_ascii=False)
