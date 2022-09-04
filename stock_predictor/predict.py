@@ -30,6 +30,7 @@ def predict(id: str, date: str) -> float:
 
     # Start predicting with pre-trained model.
     with R.start(experiment_name="workflow"):
+        # TODO: Need to use another way to load the recorder. This id is not suitable for others.
         model = R.get_recorder(recorder_id="cc9943bccdb2471eae81cde5a2be32ee").load_object("params.pkl")
         pred = model.predict(dataset)
         return round(pred[date, id], 2)
