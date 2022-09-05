@@ -20,12 +20,20 @@ A simple scenario may like,
 ## Quick Start
 
 ### Installation & Deployment
-It's highly encouraged to use a virtual environment with Anaconda. We assume you are using a conda environment with Python 3.8.
+It's highly encouraged to use a virtual environment with Anaconda. Please visit [Anaconda](https://www.anaconda.com/) website to download a suitable version for your system and install it.
+Then run following commands to create a clean Python 3.8 environment with name `py38`.
+```bash
+conda create -n py38 python=3.8
+conda activate py38
+```
 
-Firstly, install Qlib and download trading data.
+Now, let's prepare the dependencies and data.
 ```bash
 pip install numpy
 pip install --upgrade cython
+
+# <your_workspace_dir> is the folder where we put the Qlib and StockPredictor repositories.
+cd <your_workspace_dir>
 git clone https://github.com/microsoft/qlib.git && cd qlib
 pip install .
 python scripts/data_collector/yahoo/collector.py download_data --source_dir ~/.qlib/stock_data/source/cn_data --start 1999-01-01 --end 2022-12-31 --delay 1 --interval 1d --region CN
@@ -33,21 +41,27 @@ python scripts/data_collector/yahoo/collector.py normalize_data --source_dir ~/.
 python scripts/dump_bin.py dump_all --csv_path ~/.qlib/stock_data/source/cn_1d_nor --qlib_dir ~/.qlib/qlib_data/cn_data --freq day --exclude_fields date,symbol
 ```
 
-Secondly, download this repository and load data.
+After that, clone this repository and do some setup work.
 ```bash
-git clone https://github.com/jingedawang/StockPredictor.git
+cd <your_workspace_dir>
+git clone https://github.com/jingedawang/StockPredictor.git && cd StockPredictor
 pip install -r stock_predictor/requirements.txt
 python stock_predictor/setup.py
 ```
 
-Then, we need to train a prediction model, and do a full prediction for all the stocks in the market.
+Then, we need to train a prediction model.
 ```bash
 python stock_predictor/train_two_week_predictor.py
-python stock_predictor/predict_all.py
 ```
 
 Before starting the service, we need to setup a schedule to automatically update the data everyday after the market closing time.
+Please open the `update_data.crontab` file and change the path of the `collector.py` script according to your local directory.
+This manual operation should be eliminated later.
 ```bash
+# Use tmux to monitor the execution of the script.
+sudo apt install tmux
+tmux new-session -d -s update-data
+tmux send-keys -t update-data 'conda activate py38' Enter
 crontab config/update_data.crontab
 ```
 
