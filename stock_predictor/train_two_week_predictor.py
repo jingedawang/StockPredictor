@@ -6,13 +6,12 @@ from qlib.workflow import R
 from qlib.tests.data import GetData
 from qlib.tests.config import CSI300_GBDT_TASK
 
-from stock_predictor.data_handler import Alpha158TwoWeeks
+from data_handler import Alpha158TwoWeeks
 
 
 if __name__ == "__main__":
-
-    # use default data
-    provider_uri = "~/.qlib/qlib_data/cn_data"  # target_dir
+    # use default data.
+    provider_uri = "~/.qlib/qlib_data/cn_data"
     GetData().qlib_data(target_dir=provider_uri, region=REG_CN, exists_skip=True)
     qlib.init(provider_uri=provider_uri, region=REG_CN)
 
@@ -43,6 +42,7 @@ if __name__ == "__main__":
         R.log_params(**flatten_dict(CSI300_GBDT_TASK))
         model.fit(dataset)
         R.save_objects(**{"params.pkl": model})
+        print('Recorder id:', R.get_recorder().id)
 
         pred = model.predict(dataset)
         print('pred', pred)
