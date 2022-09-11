@@ -23,6 +23,7 @@ def load_stock_list():
     os.makedirs(os.path.dirname(STOCK_DATABASE), exist_ok=True)
     database = TinyDB(STOCK_DATABASE)
 
+    print('Load stock list into database...')
     stock_list = pd.read_csv(os.path.dirname(__file__) + '/../data/stock_list.csv')
     stock_list_with_progressbar = tqdm.tqdm(stock_list.iterrows(), total=stock_list.index.size)
     for _, row in stock_list_with_progressbar:
@@ -45,12 +46,13 @@ def load_stock_list():
         query = Query()
         database.upsert(stock_json, query.id == stock.id)
 
-def predict_all(date=None):
+def predict_all(date=None, force_update=False):
     """
     Predict for all stocks in given date. If no date is given, predict for all the dates.
 
     Args:
         date: The date to predict.
+        force_update: Never skip any stocks if set to `True`.
     """
     qlib.init(provider_uri='~/.qlib/qlib_data/cn_data')
     database = TinyDB(STOCK_DATABASE)
@@ -58,8 +60,8 @@ def predict_all(date=None):
     for row in database_with_progressbar:
         if date is None:
             # If no date specified, predict all the dates start from 2022-01-01.
-            if row['predict'] is not None:
-                # If the predictions already exist in the database, don't waste time on repeating it.
+            if row['predict'] is not None and not force_update:
+                # If the predictions already exist in the database, don't waste time on repeating it, unless force_update is set.
                 continue
             prediction = predict.predict(row['qlib_id'], start_date='2022-01-01', end_date=datetime.date.today().strftime('%Y-%m-%d'))
         else:
@@ -69,7 +71,10 @@ def predict_all(date=None):
             prediction = prediction.loc[(slice(None), row['qlib_id']),].droplevel('instrument')
             prediction.index = prediction.index.map(lambda timestamp: timestamp.strftime('%Y-%m-%d'))
             # Append the predictions to the already existing ones.
-            row['predict'] = prediction.to_dict() if row['predict'] is None else prediction.to_dict().update(row['predict'])
+            if row['predict'] is None:
+                row['predict'] = prediction.to_dict()
+            else:
+                row['predict'].update(prediction.to_dict())
             database.upsert(row, Query().id == row['id'])
     
 def get_stock_list() -> str:
@@ -117,7 +122,7 @@ def get_history_and_predict_result(id: str, date: str) -> str:
     latest_trading_date = qlib.data.D.calendar(start_time=(pd.Timestamp(date) - pd.Timedelta(days=20)).strftime("%Y-%m-%d"), end_time=date)[-1].strftime("%Y-%m-%d")
     predicted_trading_date = (pd.Timestamp(latest_trading_date) + pd.Timedelta(days=14)).strftime("%Y-%m-%d")
     predicted_price = None
-    if latest_trading_date in matched_rows[0]['predict']:
+    if matched_rows[0]['predict'] is not None and latest_trading_date in matched_rows[0]['predict']:
         predicted_price = round((1.0 + matched_rows[0]['predict'][latest_trading_date]) * history[-1][latest_trading_date], 2)
 
     # Create Stock object and convert it to json string
