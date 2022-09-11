@@ -24,7 +24,8 @@ def load_stock_list():
     database = TinyDB(STOCK_DATABASE)
 
     stock_list = pd.read_csv(os.path.dirname(__file__) + '/../data/stock_list.csv')
-    for index, row in stock_list.iterrows():
+    stock_list_with_progressbar = tqdm.tqdm(stock_list.iterrows(), total=stock_list.index.size)
+    for _, row in stock_list_with_progressbar:
         id = row['ts_code'][:-3]
         name = row['name']
         enname = row['enname']
@@ -43,7 +44,6 @@ def load_stock_list():
         stock_json = stock.to_dict()
         query = Query()
         database.upsert(stock_json, query.id == stock.id)
-        print(f'Updated stock {index}:', stock_json)
 
 def predict_all(date=None):
     """
@@ -57,14 +57,18 @@ def predict_all(date=None):
     database_with_progressbar = tqdm.tqdm(database.all())
     for row in database_with_progressbar:
         if date is None:
+            # If no date specified, predict all the dates start from 2022-01-01.
             if row['predict'] is not None:
+                # If the predictions already exist in the database, don't waste time on repeating it.
                 continue
             prediction = predict.predict(row['qlib_id'], start_date='2022-01-01', end_date=datetime.date.today().strftime('%Y-%m-%d'))
         else:
+            # If a date is specified, predict for it.
             prediction = predict.predict(row['qlib_id'], start_date=date, end_date=date)
         if not prediction.empty:
             prediction = prediction.loc[(slice(None), row['qlib_id']),].droplevel('instrument')
             prediction.index = prediction.index.map(lambda timestamp: timestamp.strftime('%Y-%m-%d'))
+            # Append the predictions to the already existing ones.
             row['predict'] = prediction.to_dict() if row['predict'] is None else prediction.to_dict().update(row['predict'])
             database.upsert(row, Query().id == row['id'])
     
