@@ -1,36 +1,41 @@
 import pandas as pd
-from qlib.data import D
+import qlib
+import qlib.data
 from qlib.data.dataset import DatasetH
 from qlib.workflow import R
 
 from data_handler import Alpha158TwoWeeks
 
 
-def predict(id: str, date: str) -> float:
+def predict(id='all', start_date=None, end_date=None) -> pd.DataFrame:
     """
-    Predict the after-two-weeks price of the given stock at the specific date.
+    Predict the after-two-weeks price of the given stock in the specific date range.
 
     Args:
-        id: The qlib id of the stock.
-        date: The date when the prediction is made.
+        id: The qlib id of the stock. Default 'all' means predicting all the stocks.
+        start_date: The beginning of the requested date range (inclusive).
+        end_date: The end of the requested date range (inclusive).
     """
     # Reset the date to the latest trading date
-    latest_trading_date = D.calendar(start_time=(pd.Timestamp(date) - pd.Timedelta(days=20)).strftime("%Y-%m-%d"), end_time=date)[-1]
-    if latest_trading_date < pd.Timestamp(date):
-        date = latest_trading_date.strftime("%Y-%m-%d")
+    latest_trading_date = qlib.data.D.calendar(start_time=(pd.Timestamp(start_date) - pd.Timedelta(days=20)).strftime("%Y-%m-%d"), end_time=start_date)[-1]
+    if latest_trading_date < pd.Timestamp(start_date):
+        start_date = latest_trading_date.strftime("%Y-%m-%d")
+    if end_date is None:
+        end_date = start_date
 
     # Prepare the data used for inference.
-    data_handler = Alpha158TwoWeeks(instruments=[id])
+    if id != 'all':
+        id = [id]
+    data_handler = Alpha158TwoWeeks(instruments=id)
     dataset = DatasetH(
         handler=data_handler,
         segments={
-            "test": [date, date]
+            "test": [start_date, end_date]
         }
     )
 
     # Start predicting with pre-trained model.
-    with R.start(experiment_name="workflow"):
-        # TODO: Need to use another way to load the recorder. This id is not suitable for others.
-        model = R.get_recorder(recorder_id="cc9943bccdb2471eae81cde5a2be32ee").load_object("params.pkl")
+    with R.start(experiment_name="stock_predictor", recorder_name='predict'):
+        model = R.get_recorder(recorder_name='two_weeks_model').load_object("model.pkl")
         pred = model.predict(dataset)
-        return round(pred[date, id], 2)
+        return pred

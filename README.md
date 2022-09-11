@@ -80,6 +80,7 @@ You could test the web API on your own machine and compare it with the public on
 #### API 1: Get stock list
 ```
 Url: /stock/list
+Description: Get the stock list in China market.
 Parameter: None
 Response: A JSON string.
 Example for request http://20.205.61.210:5000/stock/list:
@@ -107,6 +108,7 @@ Example for request http://20.205.61.210:5000/stock/list:
 #### API 2: Predict
 ```
 Url: /stock/<id>
+Description: Predict the after-two-weeks price for the specified stock.
 Parameter: <id>: The id of the stock.
 Response: A JSON string containing both history prices and predicted price.
 Example for request http://20.205.61.210:5000/stock/600000:
@@ -118,29 +120,32 @@ Example for request http://20.205.61.210:5000/stock/600000:
 	"enname": "Shanghai Pudong Development Bank Co.,Ltd.",
 	"history": [
 		{
-			"2022-08-30": 7.19
+			"2022-09-06": 7.26
 		},
 		{
-			"2022-08-31": 7.27
+			"2022-09-07": 7.22
 		},
 		{
-			"2022-09-01": 7.23
+			"2022-09-08": 7.24
 		},
 		{
-			"2022-09-02": 7.21
+			"2022-09-09": 7.31
 		}
 	],
-	"predict": 7.33
+	"predict": {
+		"2022-09-23": 7.36
+	}
 }
 ```
 #### API 3: Predict in specific date
 ```
 Url: /stock/<id>/<date>
+Description: Predict the after-two-weeks price for the specified stock at the given date. Only support dates start from 2022-01-01.
 Parameter:
     <id>: The id of the stock.
     <date>: The date when performs the prediction.
 Response: A JSON string containing both history prices and predicted price for the prediction.
-Example for request http://20.205.61.210:5000/stock/600000/2020-05-12:
+Example for request http://20.205.61.210:5000/stock/600000/2022-04-29:
 {
 	"id": "600000",
 	"pinyin": "PFYH",
@@ -149,19 +154,21 @@ Example for request http://20.205.61.210:5000/stock/600000/2020-05-12:
 	"enname": "Shanghai Pudong Development Bank Co.,Ltd.",
 	"history": [
 		{
-			"2020-05-07": 10.39
+			"2022-04-26": 7.87
 		},
 		{
-			"2020-05-08": 10.44
+			"2022-04-27": 7.83
 		},
 		{
-			"2020-05-11": 10.43
+			"2022-04-28": 7.99
 		},
 		{
-			"2020-05-12": 10.34
+			"2022-04-29": 8.03
 		}
 	],
-	"predict": 10.21
+	"predict": {
+		"2022-05-13": 8.34
+	}
 }
 ```
 

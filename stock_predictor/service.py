@@ -1,16 +1,19 @@
+import datetime
 import json
 import os
-import pandas
+from pathlib import Path
+import pandas as pd
 import pypinyin
 import qlib.data
 from tinydb import TinyDB, Query
+import tqdm
 
 import predict
 from stock import Stock
 
 
 ## Define the database file name here.
-STOCK_DATABASE = os.path.expanduser("~") + '/.stock/stock.json'
+STOCK_DATABASE = Path('~/.stock/stock.json').expanduser()
 
 
 def load_stock_list():
@@ -20,7 +23,7 @@ def load_stock_list():
     os.makedirs(os.path.dirname(STOCK_DATABASE), exist_ok=True)
     database = TinyDB(STOCK_DATABASE)
 
-    stock_list = pandas.read_csv(os.path.dirname(__file__) + '/../data/stock_list.csv')
+    stock_list = pd.read_csv(os.path.dirname(__file__) + '/../data/stock_list.csv')
     for index, row in stock_list.iterrows():
         id = row['ts_code'][:-3]
         name = row['name']
@@ -41,6 +44,29 @@ def load_stock_list():
         query = Query()
         database.upsert(stock_json, query.id == stock.id)
         print(f'Updated stock {index}:', stock_json)
+
+def predict_all(date=None):
+    """
+    Predict for all stocks in given date. If no date is given, predict for all the dates.
+
+    Args:
+        date: The date to predict.
+    """
+    qlib.init(provider_uri='~/.qlib/qlib_data/cn_data')
+    database = TinyDB(STOCK_DATABASE)
+    database_with_progressbar = tqdm.tqdm(database.all())
+    for row in database_with_progressbar:
+        if date is None:
+            if row['predict'] is not None:
+                continue
+            prediction = predict.predict(row['qlib_id'], start_date='2022-01-01', end_date=datetime.date.today().strftime('%Y-%m-%d'))
+        else:
+            prediction = predict.predict(row['qlib_id'], start_date=date, end_date=date)
+        if not prediction.empty:
+            prediction = prediction.loc[(slice(None), row['qlib_id']),].droplevel('instrument')
+            prediction.index = prediction.index.map(lambda timestamp: timestamp.strftime('%Y-%m-%d'))
+            row['predict'] = prediction.to_dict() if row['predict'] is None else prediction.to_dict().update(row['predict'])
+            database.upsert(row, Query().id == row['id'])
     
 def get_stock_list() -> str:
     """
@@ -69,7 +95,7 @@ def get_history_and_predict_result(id: str, date: str) -> str:
     Returns:
         A JSON string containing the history prices and the predicted price of the stock.
     """
-    qlib.init(provider_uri=os.path.expanduser("~") + '/.qlib/qlib_data/cn_data')
+    qlib.init(provider_uri='~/.qlib/qlib_data/cn_data')
 
     # Get the qlib_id from the database.
     database = TinyDB(STOCK_DATABASE)
@@ -84,9 +110,20 @@ def get_history_and_predict_result(id: str, date: str) -> str:
     history = [{key[1].strftime('%Y-%m-%d'): round(value, 2)} for key, value in history_data.to_dict()['$close/$factor'].items()]
 
     # Get predicted price.
-    # TODO: Need to cache the pre-predicted results. Don't predict at realtime because it's too slow.
-    #predicted_price = predict.predict(qlib_id, date)
+    latest_trading_date = qlib.data.D.calendar(start_time=(pd.Timestamp(date) - pd.Timedelta(days=20)).strftime("%Y-%m-%d"), end_time=date)[-1].strftime("%Y-%m-%d")
+    predicted_trading_date = (pd.Timestamp(latest_trading_date) + pd.Timedelta(days=14)).strftime("%Y-%m-%d")
+    predicted_price = None
+    if latest_trading_date in matched_rows[0]['predict']:
+        predicted_price = round((1.0 + matched_rows[0]['predict'][latest_trading_date]) * history[-1][latest_trading_date], 2)
 
     # Create Stock object and convert it to json string
-    stock = Stock(id, matched_rows[0]['pinyin'], matched_rows[0]['name'], qlib_id, enname=matched_rows[0]['enname'], history=history)
+    stock = Stock(
+        id,
+        matched_rows[0]['pinyin'],
+        matched_rows[0]['name'],
+        qlib_id,
+        enname=matched_rows[0]['enname'],
+        history=history,
+        predict={predicted_trading_date: predicted_price}
+    )
     return stock.to_json(ensure_ascii=False)
