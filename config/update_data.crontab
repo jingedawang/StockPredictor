@@ -1,4 +1,4 @@
 # Update stock data at 16:00 in each working day afternoon, one hour past the China stock market closing.
 0 16 * * 1-5 tmux send-keys -t update-data 'python ~/projects/qlib/scripts/data_collector/yahoo/collector.py update_data_to_bin --qlib_data_1d_dir ~/.qlib/qlib_data/cn_data' Enter
-# TODO: Add predict all procedure
-#0 21 * * 1-5 tmux send-keys -t update-data 'python ~/projects/StockPredictor/stock_predictor/predict_all.py' Enter
+# Predict for all the stocks based on today's new data.
+0 20 * * 1-5 tmux send-keys -t update-data 'python ~/projects/StockPredictor/stock_predictor/predict_all.py' Enter

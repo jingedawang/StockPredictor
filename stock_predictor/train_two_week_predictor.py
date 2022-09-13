@@ -38,10 +38,10 @@ if __name__ == "__main__":
     print(example_df.head())
 
     # start experiment.
-    with R.start(experiment_name="workflow"):
+    with R.start(experiment_name='stock_predictor', recorder_name='two_weeks_model'):
         R.log_params(**flatten_dict(CSI300_GBDT_TASK))
         model.fit(dataset)
-        R.save_objects(**{"params.pkl": model})
+        R.save_objects(**{"model.pkl": model})
         print('Recorder id:', R.get_recorder().id)
 
         pred = model.predict(dataset)

@@ -1,11 +1,13 @@
 import datetime
 from flask import Flask
+from flask_cors import CORS
 import logging
 
 import service
 
 
 app = Flask(__name__)
+CORS(app, resources=r'/*')
 app.logger.setLevel(logging.INFO)
 
 
@@ -67,19 +69,21 @@ def predict(id: str):
         "enname": "Shanghai Pudong Development Bank Co.,Ltd.",
         "history": [
             {
-                "2022-08-30": 7.19
+                "2022-09-06": 7.26
             },
             {
-                "2022-08-31": 7.27
+                "2022-09-07": 7.22
             },
             {
-                "2022-09-01": 7.23
+                "2022-09-08": 7.24
             },
             {
-                "2022-09-02": 7.21
+                "2022-09-09": 7.31
             }
         ],
-        "predict": 7.33
+        "predict": {
+            "2022-09-23": 7.36
+        }
     }
 
     Args:
@@ -105,19 +109,21 @@ def predict_in_date(id: str, date: str):
         "enname": "Shanghai Pudong Development Bank Co.,Ltd.",
         "history": [
             {
-                "2020-05-07": 10.39
+                "2022-04-26": 7.87
             },
             {
-                "2020-05-08": 10.44
+                "2022-04-27": 7.83
             },
             {
-                "2020-05-11": 10.43
+                "2022-04-28": 7.99
             },
             {
-                "2020-05-12": 10.34
+                "2022-04-29": 8.03
             }
         ],
-        "predict": 10.21
+        "predict": {
+            "2022-05-13": 8.34
+        }
     }
 
     Args:

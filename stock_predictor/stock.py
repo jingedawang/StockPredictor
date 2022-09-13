@@ -14,7 +14,7 @@ class Stock:
         name (float): The Chinese name of the stock.
         qlib_id (str): The id of the stock used in Qlib data.
         history (List[Dict]): The history prices of the stock. Each item is a key value pair of date and price.
-        predict (float): The predicted price for the stock.
+        predict (Dict): The predicted price for the stock.
     """
     id: str
     pinyin: str
@@ -22,4 +22,4 @@ class Stock:
     qlib_id: str
     enname: Optional[str] = None
     history: Optional[List[Dict[str, float]]] = None
-    predict: Optional[float] = None
+    predict: Optional[Dict[str, float]] = None
