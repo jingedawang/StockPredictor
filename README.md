@@ -31,13 +31,13 @@ Now, let's prepare the dependencies and data.
 ```bash
 pip install numpy
 pip install --upgrade cython
+pip install yahooquery
+pip install bs4
 
 # <your_workspace_dir> is the folder where we put the Qlib and StockPredictor repositories.
 cd <your_workspace_dir>
 git clone https://github.com/microsoft/qlib.git && cd qlib
 pip install .
-pip install yahooquery
-pip install bs4
 python scripts/data_collector/yahoo/collector.py download_data --source_dir ~/.qlib/stock_data/source/cn_data --start 1999-01-01 --end 2022-12-31 --delay 1 --interval 1d --region CN
 python scripts/data_collector/yahoo/collector.py normalize_data --source_dir ~/.qlib/stock_data/source/cn_data --normalize_dir ~/.qlib/stock_data/source/cn_1d_nor --region CN --interval 1d
 python scripts/dump_bin.py dump_all --csv_path ~/.qlib/stock_data/source/cn_1d_nor --qlib_dir ~/.qlib/qlib_data/cn_data --freq day --exclude_fields date,symbol
