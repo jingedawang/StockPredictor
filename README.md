@@ -33,6 +33,9 @@ pip install numpy
 pip install --upgrade cython
 pip install yahooquery
 pip install bs4
+pip install pypinyin
+pip install tinyDB
+pip install dataclasses_json
 
 # <your_workspace_dir> is the folder where we put the Qlib and StockPredictor repositories.
 cd <your_workspace_dir>
