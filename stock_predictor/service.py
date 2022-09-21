@@ -10,7 +10,7 @@ import tqdm
 import predict
 from functools import partial
 from stock import Stock
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 ## Define the database file name here.
@@ -56,12 +56,20 @@ def predict_all(date=None, force_update=False):
     """
     qlib.init(provider_uri='~/.qlib/qlib_data/cn_data')
     database = TinyDB(STOCK_DATABASE)   
-    predict_all_loop_fixed = partial(predict_all_loop, date, force_update, database)
+    predict_all_loop_fixed = partial(predict_all_loop, date, force_update)
     with tqdm.tqdm(database.all()) as database_with_progressbar:
-        with ThreadPoolExecutor(max_workers= 100) as poolExecutor:        
-            poolExecutor.map(predict_all_loop_fixed, database_with_progressbar)
+        with ThreadPoolExecutor(max_workers= 100) as poolExecutor:  
+            futures = []  
+            rows = [] 
+            for row in database_with_progressbar:
+                futures.append(poolExecutor.submit(predict_all_loop_fixed, row))
+            for future in as_completed(futures):
+                rows.append(future.result())                
+        for row in rows:
+            database.upsert(row, Query().id == row['id'])
+            database_with_progressbar.update(1)
             
-def predict_all_loop(date, force_update, database, row):    
+def predict_all_loop(date, force_update, row):    
         prediction = pd.DataFrame()
         if date is None:
             # If no date specified, predict all the dates start from 2022-01-01.
@@ -81,7 +89,8 @@ def predict_all_loop(date, force_update, database, row):
                 row['predict'] = prediction.to_dict()
             else:
                 row['predict'].update(prediction.to_dict())
-            database.upsert(row, Query().id == row['id'])
+        return row
+            
     
 def get_stock_list() -> str:
     """
