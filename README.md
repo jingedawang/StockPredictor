@@ -46,17 +46,21 @@ python scripts/data_collector/yahoo/collector.py normalize_data --source_dir ~/.
 python scripts/dump_bin.py dump_all --csv_path ~/.qlib/stock_data/source/cn_1d_nor --qlib_dir ~/.qlib/qlib_data/cn_data --freq day --exclude_fields date,symbol
 ```
 
-After that, clone this repository and do some setup work.
+After that, clone this repository and install the dependencies.
 ```bash
 cd <your_workspace_dir>
 git clone https://github.com/jingedawang/StockPredictor.git && cd StockPredictor
 pip install -r stock_predictor/requirements.txt
-python stock_predictor/setup.py
 ```
 
-Then, we need to train a prediction model.
+Train a prediction model.
 ```bash
 python stock_predictor/train_two_week_predictor.py
+```
+
+Do some setup work for the prediction service. This includes loading the stock list into database and doing a complete prediction for all the stocks.
+```bash
+python stock_predictor/setup.py
 ```
 
 Before starting the service, we need to setup a schedule to automatically update the data everyday after the market closing time.
