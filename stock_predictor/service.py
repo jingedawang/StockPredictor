@@ -55,26 +55,25 @@ def predict_all(date=None, force_update=False):
         force_update: Never skip any stocks if set to `True`.
     """
     qlib.init(provider_uri='~/.qlib/qlib_data/cn_data')
-    database = TinyDB(STOCK_DATABASE)   
+    database = TinyDB(STOCK_DATABASE)
     predict_all_loop_fixed = partial(predict_all_loop, date, force_update)
-    with tqdm.tqdm(database.all()) as database_with_progressbar:
-        with ThreadPoolExecutor(max_workers= 100) as poolExecutor:  
-            futures = []  
-            rows = [] 
-            for row in database_with_progressbar:
+
+    with tqdm.tqdm(len(database.all())) as progress_bar:
+        with ThreadPoolExecutor(max_workers= 20) as poolExecutor:
+            futures = []
+            for row in database.all():
                 futures.append(poolExecutor.submit(predict_all_loop_fixed, row))
             for future in as_completed(futures):
-                rows.append(future.result())                
-        for row in rows:
-            database.upsert(row, Query().id == row['id'])
-            database_with_progressbar.update(1)
+                updated_row = future.result()
+                if updated_row:
+                    database.upsert(updated_row, Query().id == updated_row['id'])
+                progress_bar.update(1)
             
-def predict_all_loop(date, force_update, row):    
+def predict_all_loop(date, force_update, row):
         prediction = pd.DataFrame()
         if date is None:
             # If no date specified, predict all the dates start from 2022-01-01.
-            if row['predict'] is not None and not force_update:                
-
+            if row['predict'] is not None and not force_update:
                 # If the predictions already exist in the database, don't waste time on repeating it, unless force_update is set.
                 return
             prediction = predict.predict(row['qlib_id'], start_date='2022-01-01', end_date=datetime.date.today().strftime('%Y-%m-%d'))
