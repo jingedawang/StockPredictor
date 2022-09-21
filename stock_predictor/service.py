@@ -7,14 +7,14 @@ import pypinyin
 import qlib.data
 from tinydb import TinyDB, Query
 import tqdm
-
 import predict
+from functools import partial
 from stock import Stock
+from concurrent.futures import ThreadPoolExecutor
 
 
 ## Define the database file name here.
 STOCK_DATABASE = Path('~/.stock/stock.json').expanduser()
-
 
 def load_stock_list():
     """
@@ -55,14 +55,20 @@ def predict_all(date=None, force_update=False):
         force_update: Never skip any stocks if set to `True`.
     """
     qlib.init(provider_uri='~/.qlib/qlib_data/cn_data')
-    database = TinyDB(STOCK_DATABASE)
-    database_with_progressbar = tqdm.tqdm(database.all())
-    for row in database_with_progressbar:
+    database = TinyDB(STOCK_DATABASE)   
+    predict_all_loop_fixed = partial(predict_all_loop, date, force_update, database)
+    with tqdm.tqdm(database.all()) as database_with_progressbar:
+        with ThreadPoolExecutor(max_workers= 100) as poolExecutor:        
+            poolExecutor.map(predict_all_loop_fixed, database_with_progressbar)
+            
+def predict_all_loop(date, force_update, database, row):    
+        prediction = pd.DataFrame()
         if date is None:
             # If no date specified, predict all the dates start from 2022-01-01.
-            if row['predict'] is not None and not force_update:
+            if row['predict'] is not None and not force_update:                
+
                 # If the predictions already exist in the database, don't waste time on repeating it, unless force_update is set.
-                continue
+                return
             prediction = predict.predict(row['qlib_id'], start_date='2022-01-01', end_date=datetime.date.today().strftime('%Y-%m-%d'))
         else:
             # If a date is specified, predict for it.
