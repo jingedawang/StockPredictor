@@ -63,19 +63,18 @@ def predict_all(date=None):
     database = TinyDB(STOCK_DATABASE)
     if date is None:
         date = datetime.date.today().strftime('%Y-%m-%d')
+    print('before start', datetime.datetime.now())
     for rows in tqdm.tqdm(batch(database.all(), 300)):
         predictions = predict.predict([row['qlib_id'] for row in rows], start_date=date, end_date=date)
+        print('after predict', datetime.datetime.now())
         if not predictions.empty:
-            for row in rows:
-                prediction = predictions[predictions["instrument"] == row['qlib_id']].droplevel('instrument')
-                prediction.index = prediction.index.map(lambda timestamp: timestamp.strftime('%Y-%m-%d'))
-                # Append the predictions to the already existing ones.
-                if row['predict'] is None:
-                    row['predict'] = prediction.to_dict()
-                else:
-                    row['predict'].update(prediction.to_dict())
-                database.upsert(row, Query().id == row['id'])    
-            
+            for key, price in predictions.to_dict().items():
+                id = key[1][2:]
+                prediction = {date: price}
+                row = database.search(Query().id == id)[0]
+                row['predict'] = prediction
+                database.upsert(row, Query().id == id)
+        print('after upsert', datetime.datetime.now())
     
 def get_stock_list() -> str:
     """
