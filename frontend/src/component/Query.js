@@ -124,7 +124,7 @@ export function Query() {
     return (
         <Card className='main'>
             <Select
-                style={{ width: 150 }}
+                className='select'
                 showSearch
                 placeholder="Select your stock"
                 optionFilterProp="label"

@@ -20,9 +20,9 @@ const columns = [
         key: 'rate',
         render: (rate, _, idx) => (
             <>              
-                <Tag color={rate > 0 ? "red" : "green"} key={idx}>
+                {rate ? <Tag color={rate > 0 ? "red" : "green"} key={idx}>
                     {`${(Number(rate) * 100).toFixed(2)}%`}
-                </Tag>             
+                </Tag> : null}            
             </>
         )
     }
@@ -34,7 +34,7 @@ export function Board() {
     useEffect(() => {
         const tmp = [];
         const key = localStorage.getItem("key").split(",");
-        for ( let i = Math.min(10, key.length) - 1; i >= 0; i-- ) {
+        for ( let i = key.length - 1; i >= Math.max(0, key.length - 10); i-- ) {
             tmp.push(JSON.parse(localStorage.getItem(key[i])));
         }
         setData(tmp);
