@@ -10,12 +10,12 @@ function App() {
   return (
     <div className="app">
       <Layout>
-          <Header className='head'>Header</Header>
+          <Header className='head'>Stock Prediction</Header>
           <Content className='content'>
             <Query />
             <Board />
           </Content>
-        <Footer className='footer'>Footer</Footer>
+        <Footer className='footer'>author @Yifan Zou</Footer>
       </Layout>
      
     </div>

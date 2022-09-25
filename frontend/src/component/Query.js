@@ -7,10 +7,10 @@ import './Query.css';
 
 const { Option } = Select;
 let charts = undefined;
+const key = [];
 
 export function Query() {
     const onSelect = (id) => {
-      console.log("###", id)
       axios.get(`http://20.205.61.210:5000/stock/${id}`).then((res) => {
         const result = res.data.history.map(item => ({
           date: Object.keys(item)[0].replaceAll('-', ''),
@@ -21,8 +21,23 @@ export function Query() {
           value: Object.values(res.data.predict)[0]
         })
         setPredictData(result);
+        const data = {
+          key: res.data.id,
+          name: res.data.name,
+          id: res.data.id,
+          rate: (Object.values(res.data.predict)[0] - Object.values(res.data.history[res.data.history.length - 1])[0]) / Object.values(res.data.history[res.data.history.length - 1])[0]
+        }
+        if (!localStorage.getItem(res.data.id)) {
+          localStorage.setItem(res.data.id, JSON.stringify(data));
+        }
+        if (key.indexOf(res.data.id) !== -1) {
+          let idx = key.indexOf(res.data.id);
+          key.splice(idx, 1);
+        }
+        key.push(res.data.id);
       });
     };
+    localStorage.setItem("key", key);
 
     const [stocksList, setStocksList] = useState([]);
     const [predictData, setPredictData] = useState([]);

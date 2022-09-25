@@ -9,6 +9,8 @@ html {
   position: fixed;
   z-index: 1;
   width: 100%;
+  color: aliceblue;
+  font-weight: 500;
 }
 
 .content {
@@ -21,5 +23,6 @@ html {
   z-index: 1;
   height: 60px;
   width: 100%;
+  text-align: center;
 }
 
