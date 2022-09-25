@@ -1,4 +1,4 @@
-import { Card, Select } from 'antd';
+import { Alert, Card, Select } from 'antd';
 import React, { useEffect, useState } from 'react';
 import * as echarts from 'echarts';
 import axios from 'axios';
@@ -10,34 +10,40 @@ let charts = undefined;
 const key = [];
 
 export function Query() {
+    const [select, setSelect] = useState(0);
     const onSelect = (id) => {
       axios.get(`http://20.205.61.210:5000/stock/${id}`).then((res) => {
-        const result = res.data.history.map(item => ({
-          date: Object.keys(item)[0].replaceAll('-', ''),
-          value: Object.values(item)[0]
-        }))
-        result.push({
-          date: Object.keys(res.data.predict)[0].replaceAll('-', ''),
-          value: Object.values(res.data.predict)[0]
-        })
-        setPredictData(result);
-        const data = {
-          key: res.data.id,
-          name: res.data.name,
-          id: res.data.id,
-          rate: (Object.values(res.data.predict)[0] - Object.values(res.data.history[res.data.history.length - 1])[0]) / Object.values(res.data.history[res.data.history.length - 1])[0]
+        if(res.data.history && res.data.history.length && Object.values(res.data.predict) && Object.values(res.data.predict).length) {
+          const result = res.data.history.map(item => ({
+            date: Object.keys(item)[0].replaceAll('-', ''),
+            value: Object.values(item)[0]
+          }))
+          result.push({
+            date: Object.keys(res.data.predict)[0].replaceAll('-', ''),
+            value: Object.values(res.data.predict)[0]
+          })
+          setPredictData(result);
+          const data = {
+            key: res.data.id,
+            name: res.data.name,
+            id: res.data.id,
+            rate: (Object.values(res.data.predict)[0] - Object.values(res.data.history[res.data.history.length - 1])[0]) / Object.values(res.data.history[res.data.history.length - 1])[0]
+          }
+          if (!localStorage.getItem(res.data.id)) {
+            localStorage.setItem(res.data.id, JSON.stringify(data));
+          }
+          if (key.indexOf(res.data.id) !== -1) {
+            let idx = key.indexOf(res.data.id);
+            key.splice(idx, 1);
+          }
+          key.push(res.data.id);
+          localStorage.setItem("key", key);
+          setSelect(1);
+          return;
         }
-        if (!localStorage.getItem(res.data.id)) {
-          localStorage.setItem(res.data.id, JSON.stringify(data));
-        }
-        if (key.indexOf(res.data.id) !== -1) {
-          let idx = key.indexOf(res.data.id);
-          key.splice(idx, 1);
-        }
-        key.push(res.data.id);
+        setSelect(-1);
       });
     };
-    localStorage.setItem("key", key);
 
     const [stocksList, setStocksList] = useState([]);
     const [predictData, setPredictData] = useState([]);
@@ -121,6 +127,24 @@ export function Query() {
       );
     }
 
+    function AlertMsg() {
+      return (
+        <Alert
+          message="Error"
+          description="No current stock information found."
+          type="error"
+          showIcon
+        />
+      )
+    }
+
+    function Charts() {
+      if (!select && !predictData?.length) {
+        return null;
+      } 
+      return select > 0 ? <Result data={predictData}/> : <AlertMsg />
+    }
+
     return (
         <Card className='main'>
             <Select
@@ -133,7 +157,7 @@ export function Query() {
             >
                 { stocksList && stocksList.map(stock => <Option key={stock.pinyin} value={stock.id}>{stock.name}</Option>)}
             </Select>
-            { predictData && predictData.length ? <Result data={predictData}/> : null }
+            <Charts/>
         </Card>
     );
 }

@@ -33,12 +33,22 @@ export function Board() {
     const [data, setData] = useState([]);
     useEffect(() => {
         const tmp = [];
-        const key = localStorage.getItem("key").split(",");
+        const key = localStorage.getItem("key")?.split(",") ?? [];
         for ( let i = key.length - 1; i >= Math.max(0, key.length - 10); i-- ) {
             tmp.push(JSON.parse(localStorage.getItem(key[i])));
         }
         setData(tmp);
     },[data]);
+
+    useEffect(() => {
+        const clear = () => {
+            localStorage.clear();
+        }
+        window.addEventListener('beforeunload', clear)
+        return () => {
+            window.removeEventListener('beforeunload', clear)
+        }
+    },[])
     return (
         <Card className='main'>
             <Table columns={columns} dataSource={data}/>
