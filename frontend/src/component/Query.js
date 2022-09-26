@@ -153,11 +153,11 @@ export function Query() {
                 placeholder="Select your stock"
                 optionFilterProp="label"
                 onSelect={onSelect}
-                filterOption={(input, option) => (option.key.toLowerCase().includes(input.toLowerCase()) || option.children.includes(input)) }
+                filterOption={(input, option) => (option['data-pinyin'].toLowerCase().includes(input.toLowerCase()) || option.children.includes(input))}
             >
-                { stocksList && stocksList.map(stock => <Option key={stock.pinyin} value={stock.id}>{stock.name}</Option>)}
+                { stocksList && stocksList.map((stock, idx) => <Option key={idx} value={stock.id} data-pinyin={stock.pinyin}>{stock.name}</Option>)}
             </Select>
-            <Charts/>
+            <Charts className='chart'/>
         </Card>
     );
 }
