@@ -1,0 +1,28 @@
+
+@import '~antd/dist/antd.css';
+
+html {
+  height: 100%;
+}
+
+.head {
+  position: fixed;
+  z-index: 1;
+  width: 100%;
+  color: aliceblue;
+  font-weight: 500;
+}
+
+.content {
+  padding: 60px 0;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  z-index: 1;
+  height: 60px;
+  width: 100%;
+  text-align: center;
+}
+

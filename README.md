@@ -178,6 +178,24 @@ Example for request http://20.205.61.210:5000/stock/600000/2022-04-29:
 }
 ```
 
+### Web App
+We also provide a web app to make this service convenient for users.
+
+Run following commands to start it.
+```bash
+curl -sL https://deb.nodesource.com/setup_16.x | sudo bash -
+sudo apt-get install -y nodejs
+cd frontend
+npm install
+npm run build
+serve -s build
+```
+Then go to http://localhost:3000/ and choose the stock you like.
+The webpage should looks like
+![](data/demo-page.png)
+
+You can also try our deployed website here http://20.205.61.210:3000/.
+
 ## Contribute
 
 ### What can I contribute?

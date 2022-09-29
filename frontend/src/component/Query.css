@@ -1,0 +1,16 @@
+@import '~antd/dist/antd.css';
+
+.main {
+    width: 100%;
+    text-align: center;
+}
+
+.select {
+    width: 300px;
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+#charts {
+    margin: auto;
+}
