@@ -56,13 +56,12 @@ def predict_all(date=None):
     Predict for all stocks in given date. If no date is given, predict for all the dates.
 
     Args:
-        date: The date to predict.
-        force_update: Never skip any stocks if set to `True`.
+        date: The date to predict.        
     """
     qlib.init(provider_uri='~/.qlib/qlib_data/cn_data')
     database = TinyDB(STOCK_DATABASE)
     if date is None:
-        date = datetime.date.today().strftime('%Y-%m-%d')
+        date = '2022-01-01'
     print('before start', datetime.datetime.now())
     for rows in tqdm.tqdm(batch(database.all(), 300)):
         predictions = predict.predict([row['qlib_id'] for row in rows], start_date=date, end_date=date)
