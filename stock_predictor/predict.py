@@ -7,7 +7,7 @@ from qlib.workflow import R
 from data_handler import Alpha158TwoWeeks
 
 
-def predict(id='all', start_date=None, end_date=None) -> pd.DataFrame:
+def predict(ids='all', start_date=None, end_date=None) -> pd.DataFrame:
     """
     Predict the after-two-weeks price of the given stock in the specific date range.
 
@@ -23,10 +23,8 @@ def predict(id='all', start_date=None, end_date=None) -> pd.DataFrame:
     if end_date is None:
         end_date = start_date
 
-    # Prepare the data used for inference.
-    if id != 'all':
-        id = [id]
-    data_handler = Alpha158TwoWeeks(instruments=id)
+    # Prepare the data used for inference.    
+    data_handler = Alpha158TwoWeeks(instruments=ids)
     dataset = DatasetH(
         handler=data_handler,
         segments={

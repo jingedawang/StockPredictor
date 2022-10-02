@@ -11,4 +11,4 @@ if __name__ == '__main__':
     # Load stock list.
     service.load_stock_list()
     # Predict all the stocks in all date range.
-    service.predict_all(force_update=True)
+    service.predict_all()

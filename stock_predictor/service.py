@@ -46,36 +46,40 @@ def load_stock_list():
         query = Query()
         database.upsert(stock_json, query.id == stock.id)
 
-def predict_all(date=None, force_update=False):
+def batch(iterable, n=1):
+    """
+    Batches an iterable collection returns a collection of collections with n as the size of the inner collections.
+    i.e if Batch(list, 100)
+    will return as yielding a [[1 ... 100], [1 ... 100]]
+    Args:
+        iterable: the collection to iterate on
+        n: The batch size. Default 1.
+    """
+    l = len(iterable)
+    for ndx in range(0, l, n):
+        yield iterable[ndx:min(ndx + n, l)]
+
+def predict_all(date=None):
     """
     Predict for all stocks in given date. If no date is given, predict for all the dates.
 
     Args:
-        date: The date to predict.
-        force_update: Never skip any stocks if set to `True`.
+        date: The date to predict.        
     """
     qlib.init(provider_uri='~/.qlib/qlib_data/cn_data')
     database = TinyDB(STOCK_DATABASE)
-    database_with_progressbar = tqdm.tqdm(database.all())
-    for row in database_with_progressbar:
-        if date is None:
-            # If no date specified, predict all the dates start from 2022-01-01.
-            if row['predict'] is not None and not force_update:
-                # If the predictions already exist in the database, don't waste time on repeating it, unless force_update is set.
-                continue
-            prediction = predict.predict(row['qlib_id'], start_date='2022-01-01', end_date=datetime.date.today().strftime('%Y-%m-%d'))
-        else:
-            # If a date is specified, predict for it.
-            prediction = predict.predict(row['qlib_id'], start_date=date, end_date=date)
-        if not prediction.empty:
-            prediction = prediction.loc[(slice(None), row['qlib_id']),].droplevel('instrument')
-            prediction.index = prediction.index.map(lambda timestamp: timestamp.strftime('%Y-%m-%d'))
-            # Append the predictions to the already existing ones.
-            if row['predict'] is None:
-                row['predict'] = prediction.to_dict()
-            else:
-                row['predict'].update(prediction.to_dict())
-            database.upsert(row, Query().id == row['id'])
+    if date is None:
+        date = '2022-01-01'
+    
+    for rows in tqdm.tqdm(batch(database.all(), 300)):
+        predictions = predict.predict([row['qlib_id'] for row in rows], start_date=date, end_date=datetime.date.today().strftime('%Y-%m-%d'))        
+        if not predictions.empty:
+            for key, price in predictions.to_dict().items():
+                id = key[1][2:]
+                prediction = {date: price}
+                row = database.search(Query().id == id)[0]
+                row['predict'] = prediction
+                database.upsert(row, Query().id == id)
     
 def get_stock_list() -> str:
     """
