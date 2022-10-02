@@ -47,6 +47,14 @@ def load_stock_list():
         database.upsert(stock_json, query.id == stock.id)
 
 def batch(iterable, n=1):
+    """
+    Batces an iterable collection returns a collection of collections with n as the size of the inner collections.
+    i.e if Batch(list, 100)
+    will return as yielding a [[1 ... 100], [1 ... 100]]
+    Args:
+        iterable: the collection to iterate on
+        n = batch size
+    """
     l = len(iterable)
     for ndx in range(0, l, n):
         yield iterable[ndx:min(ndx + n, l)]
