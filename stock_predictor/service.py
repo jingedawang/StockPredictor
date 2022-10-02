@@ -1,5 +1,6 @@
 import datetime
 import json
+import math
 import os
 from pathlib import Path
 import pandas as pd
@@ -120,7 +121,7 @@ def get_history_and_predict_result(id: str, date: str) -> str:
     # Get history prices.
     recent_40_trading_days = qlib.data.D.calendar(start_time='2008-01-01', end_time=date)[-40:]
     history_data = qlib.data.D.features([qlib_id], ['$close/$factor'], recent_40_trading_days[0].strftime('%Y-%m-%d'), date)
-    history = [{key[1].strftime('%Y-%m-%d'): round(value, 2)} for key, value in history_data.to_dict()['$close/$factor'].items()]
+    history = [{key[1].strftime('%Y-%m-%d'): round(value, 2)} for key, value in history_data.to_dict()['$close/$factor'].items() if not math.isnan(value)]
 
     # Get predicted price.
     latest_trading_date = qlib.data.D.calendar(start_time=(pd.Timestamp(date) - pd.Timedelta(days=20)).strftime("%Y-%m-%d"), end_time=date)[-1].strftime("%Y-%m-%d")
