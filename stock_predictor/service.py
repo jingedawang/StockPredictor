@@ -48,12 +48,12 @@ def load_stock_list():
 
 def batch(iterable, n=1):
     """
-    Batces an iterable collection returns a collection of collections with n as the size of the inner collections.
+    Batches an iterable collection returns a collection of collections with n as the size of the inner collections.
     i.e if Batch(list, 100)
     will return as yielding a [[1 ... 100], [1 ... 100]]
     Args:
         iterable: the collection to iterate on
-        n = batch size
+        n: The batch size. Default 1.
     """
     l = len(iterable)
     for ndx in range(0, l, n):
@@ -70,9 +70,9 @@ def predict_all(date=None):
     database = TinyDB(STOCK_DATABASE)
     if date is None:
         date = '2022-01-01'
-    print('before start', datetime.datetime.now())
+    
     for rows in tqdm.tqdm(batch(database.all(), 300)):
-        predictions = predict.predict([row['qlib_id'] for row in rows], start_date=date, end_date=date)
+        predictions = predict.predict([row['qlib_id'] for row in rows], start_date=date, end_date=datetime.date.today().strftime('%Y-%m-%d'))
         print('after predict', datetime.datetime.now())
         if not predictions.empty:
             for key, price in predictions.to_dict().items():
@@ -81,7 +81,6 @@ def predict_all(date=None):
                 row = database.search(Query().id == id)[0]
                 row['predict'] = prediction
                 database.upsert(row, Query().id == id)
-        print('after upsert', datetime.datetime.now())
     
 def get_stock_list() -> str:
     """
