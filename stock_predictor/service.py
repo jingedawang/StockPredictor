@@ -72,8 +72,7 @@ def predict_all(date=None):
         date = '2022-01-01'
     
     for rows in tqdm.tqdm(batch(database.all(), 300)):
-        predictions = predict.predict([row['qlib_id'] for row in rows], start_date=date, end_date=datetime.date.today().strftime('%Y-%m-%d'))
-        print('after predict', datetime.datetime.now())
+        predictions = predict.predict([row['qlib_id'] for row in rows], start_date=date, end_date=datetime.date.today().strftime('%Y-%m-%d'))        
         if not predictions.empty:
             for key, price in predictions.to_dict().items():
                 id = key[1][2:]
