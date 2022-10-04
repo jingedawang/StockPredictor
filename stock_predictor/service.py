@@ -49,11 +49,11 @@ def load_stock_list():
 
 def batch(iterable, n=1):
     """
-    Batches an iterable collection returns a collection of collections with n as the size of the inner collections.
-    i.e if Batch(list, 100)
-    will return as yielding a [[1 ... 100], [1 ... 100]]
+    Batches an iterable to a generator of collections with the size of the inner collection specified.
+    For example, given a list of size 250, batch(list, 100) will generate a list of [list[0:100], list[100:200], list[200:250]].
+
     Args:
-        iterable: the collection to iterate on
+        iterable: The collection to be batched.
         n: The batch size. Default 1.
     """
     l = len(iterable)
@@ -72,15 +72,18 @@ def predict_all(date=None):
     if date is None:
         date = '2022-01-01'
     
-    for rows in tqdm.tqdm(batch(database.all(), 300)):
-        predictions = predict.predict([row['qlib_id'] for row in rows], start_date=date, end_date=datetime.date.today().strftime('%Y-%m-%d'))        
-        if not predictions.empty:
-            for key, price in predictions.to_dict().items():
-                id = key[1][2:]
-                prediction = {date: price}
-                row = database.search(Query().id == id)[0]
-                row['predict'] = prediction
-                database.upsert(row, Query().id == id)
+    all_rows_in_database = database.all()
+    with tqdm.tqdm(total=len(all_rows_in_database)) as progress_bar:
+        for rows in batch(all_rows_in_database, 300):
+            predictions = predict.predict([row['qlib_id'] for row in rows], start_date=date, end_date=datetime.date.today().strftime('%Y-%m-%d'))
+            if not predictions.empty:
+                for key, price in predictions.to_dict().items():
+                    id = key[1][2:]
+                    prediction = {date: price}
+                    row = database.search(Query().id == id)[0]
+                    row['predict'] = prediction
+                    database.upsert(row, Query().id == id)
+            progress_bar.update(len(rows))
     
 def get_stock_list() -> str:
     """
