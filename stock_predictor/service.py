@@ -82,7 +82,7 @@ def predict_all(date=None):
                     # Select the prediction for current row.
                     prediction = predictions.loc[(slice(None), row['qlib_id']),].droplevel('instrument')
                     prediction.index = prediction.index.map(lambda timestamp: timestamp.strftime('%Y-%m-%d'))
-                    # Append the predictions to the already existing ones.
+                    # Update the row with the prediction.
                     if row['predict'] is None:
                         row['predict'] = prediction.to_dict()
                     else:
