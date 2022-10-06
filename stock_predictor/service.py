@@ -79,6 +79,9 @@ def predict_all(date=None):
             predictions = predict.predict([row['qlib_id'] for row in rows], start_date=date, end_date=datetime.date.today().strftime('%Y-%m-%d'))
             if not predictions.empty:
                 for row in rows:
+                    # Check if the result for current row exists.
+                    if not predictions.index.isin([row['qlib_id']], level='instrument').any():
+                        continue
                     # Select the prediction for current row.
                     prediction = predictions.loc[(slice(None), row['qlib_id']),].droplevel('instrument')
                     prediction.index = prediction.index.map(lambda timestamp: timestamp.strftime('%Y-%m-%d'))
