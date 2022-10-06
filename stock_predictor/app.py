@@ -92,8 +92,17 @@ def predict(id: str):
     Returns:
         The history prices and the predicted price for the stock.
     """
+    # Check the input id.
+    if not id.isdigit() or len(id) != 6:
+        return f'Error parameter: {id} is not a valid stock id.'
+
+    # Call service to fetch the history and prediction of today.
     today = datetime.date.today().strftime('%Y-%m-%d')
-    return service.get_history_and_predict_result(id, today)
+    try:
+        result = service.get_history_and_predict_result(id, today)
+    except LookupError:
+        return f'Error parameter: Stock {id} is invalid or not supported yet.'
+    return result
 
 @app.route('/stock/<id>/<date>')
 def predict_in_date(id: str, date: str):
@@ -133,7 +142,20 @@ def predict_in_date(id: str, date: str):
     Returns:
         The history prices and the predicted price for the stock at the specified date.
     """
-    return service.get_history_and_predict_result(id, date)
+    # Check the input id and date strings.
+    if not id.isdigit() or len(id) != 6:
+        return f'Error parameter: {id} is not a valid stock id.'
+    try:
+        datetime.datetime.strptime(date, '%Y-%m-%d')
+    except ValueError:
+        return f'Error parameter: {date} is not a valid date.'
+
+    # Call service to fetch the history and prediction for the given date.
+    try:
+        result = service.get_history_and_predict_result(id, date)
+    except LookupError:
+        return f'Error parameter: Stock {id} is invalid or not supported yet.'
+    return result
 
 
 if __name__ == '__main__':
