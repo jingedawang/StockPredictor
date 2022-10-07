@@ -75,14 +75,22 @@ def predict_all(date=None):
     all_rows_in_database = database.all()
     with tqdm.tqdm(total=len(all_rows_in_database)) as progress_bar:
         for rows in batch(all_rows_in_database, 300):
+            # Predict a batch of stocks in one forward pass.
             predictions = predict.predict([row['qlib_id'] for row in rows], start_date=date, end_date=datetime.date.today().strftime('%Y-%m-%d'))
             if not predictions.empty:
-                for key, price in predictions.to_dict().items():
-                    id = key[1][2:]
-                    prediction = {date: price}
-                    row = database.search(Query().id == id)[0]
-                    row['predict'] = prediction
-                    database.upsert(row, Query().id == id)
+                for row in rows:
+                    # Check if the result for current row exists.
+                    if not predictions.index.isin([row['qlib_id']], level='instrument').any():
+                        continue
+                    # Select the prediction for current row.
+                    prediction = predictions.loc[(slice(None), row['qlib_id']),].droplevel('instrument')
+                    prediction.index = prediction.index.map(lambda timestamp: timestamp.strftime('%Y-%m-%d'))
+                    # Update the row with the prediction.
+                    if row['predict'] is None:
+                        row['predict'] = prediction.to_dict()
+                    else:
+                        row['predict'].update(prediction.to_dict())
+                    database.upsert(row, Query().id == row['id'])
             progress_bar.update(len(rows))
     
 def get_stock_list() -> str:
