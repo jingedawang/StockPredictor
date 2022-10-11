@@ -119,10 +119,13 @@ export function Query() {
         };
         charts = echarts.init(document.getElementById("charts"));
         charts.setOption(options);
+        window.onresize = function() {
+          charts.resize();
+        };
       }, []);
       return (
         <>
-          <div id='charts' style={{width: 800, height: 600 }}/>
+          <div id='charts'/>
         </>
       );
     }
