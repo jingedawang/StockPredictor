@@ -99,6 +99,7 @@ export function Query() {
               smooth: true,
               data: props.data.map((i) => i.value),
               markArea: {
+                silent: true,
                 itemStyle: {
                   color: "rgba(255, 173, 177, 0.4)",
                 },
@@ -107,6 +108,9 @@ export function Query() {
                     {
                       name: "Forecast after Two Weeks",
                       xAxis: props.data[length - 2].date,
+                      label: {
+                        position: 'left',
+                      },
                     },
                     {
                       xAxis: props.data[length - 1].date,
