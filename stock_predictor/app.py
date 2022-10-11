@@ -1,5 +1,5 @@
 import datetime
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 import logging
 
@@ -92,6 +92,9 @@ def predict(id: str):
     Returns:
         The history prices and the predicted price for the stock.
     """
+    # Log the request information.
+    print(f'Request {id} from {request.remote_addr}')
+
     # Check the input id.
     if not id.isdigit() or len(id) != 6:
         return f'Error parameter: {id} is not a valid stock id.'
@@ -142,6 +145,9 @@ def predict_in_date(id: str, date: str):
     Returns:
         The history prices and the predicted price for the stock at the specified date.
     """
+    # Log the request information.
+    print(f'Request {id}/{date} from {request.remote_addr}')
+
     # Check the input id and date strings.
     if not id.isdigit() or len(id) != 6:
         return f'Error parameter: {id} is not a valid stock id.'
@@ -149,6 +155,8 @@ def predict_in_date(id: str, date: str):
         datetime.datetime.strptime(date, '%Y-%m-%d')
     except ValueError:
         return f'Error parameter: {date} is not a valid date.'
+    if datetime.datetime.strptime(date, '%Y-%m-%d') > datetime.datetime.now():
+        return f'Error parameter: Future date {date} is not supported.'
 
     # Call service to fetch the history and prediction for the given date.
     try:
@@ -159,4 +167,4 @@ def predict_in_date(id: str, date: str):
 
 
 if __name__ == '__main__':
-   app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0')

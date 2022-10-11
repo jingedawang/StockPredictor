@@ -130,16 +130,22 @@ def get_history_and_predict_result(id: str, date: str) -> str:
     qlib_id = matched_rows[0]['qlib_id']
 
     # Get history prices.
-    recent_40_trading_days = qlib.data.D.calendar(start_time='2008-01-01', end_time=date)[-40:]
+    recent_40_trading_days = qlib.data.D.calendar(start_time=(pd.Timestamp(date) - pd.Timedelta(days=80)).strftime("%Y-%m-%d"), end_time=date)[-40:]
     history_data = qlib.data.D.features([qlib_id], ['$close/$factor'], recent_40_trading_days[0].strftime('%Y-%m-%d'), date)
     history = [{key[1].strftime('%Y-%m-%d'): round(value, 2)} for key, value in history_data.to_dict()['$close/$factor'].items() if not math.isnan(value)]
 
     # Get predicted price.
-    latest_trading_date = qlib.data.D.calendar(start_time=(pd.Timestamp(date) - pd.Timedelta(days=20)).strftime("%Y-%m-%d"), end_time=date)[-1].strftime("%Y-%m-%d")
-    predicted_trading_date = (pd.Timestamp(latest_trading_date) + pd.Timedelta(days=14)).strftime("%Y-%m-%d")
     predicted_price = None
-    if matched_rows[0]['predict'] is not None and latest_trading_date in matched_rows[0]['predict']:
-        predicted_price = round((1.0 + matched_rows[0]['predict'][latest_trading_date]) * history[-1][latest_trading_date], 2)
+    if matched_rows[0]['predict'] is not None:
+        latest_trading_date = list(history[-1].keys())[0]
+        latest_price = history[-1][latest_trading_date]
+        # If the history prices have updated but the predictions are not updated yet, keep showing lastday's result to users.
+        if latest_trading_date not in matched_rows[0]['predict']:
+            latest_trading_date = list(history[-2].keys())[0]
+            latest_price = history[-2][latest_trading_date]
+        predicted_trading_date = (pd.Timestamp(latest_trading_date) + pd.Timedelta(days=14)).strftime("%Y-%m-%d")
+        if latest_trading_date in matched_rows[0]['predict']:
+            predicted_price = round((1.0 + matched_rows[0]['predict'][latest_trading_date]) * latest_price, 2)
 
     # Create Stock object and convert it to json string
     stock = Stock(
