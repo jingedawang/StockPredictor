@@ -106,7 +106,6 @@ export function Query() {
                 data: [
                   [
                     {
-                      name: "Forecast after Two Weeks",
                       xAxis: props.data[length - 2].date,
                       label: {
                         position: 'left',
