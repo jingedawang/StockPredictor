@@ -3,6 +3,9 @@ Predict the stock price with AI models.
 
 This is the main repository of the [Stock Prediction](https://github.com/users/jingedawang/projects/2) project, which starts as an [internal project](https://hackbox.microsoft.com/project/597) in Microsoft Hackthon 2022.
 
+For investors, please try our online web service: http://20.205.61.210:3000/ <br>
+For investigators, please follow the Quick Start to learn more.
+
 ## Background
 
 Everyone loves stock. Everyone hates stock.
