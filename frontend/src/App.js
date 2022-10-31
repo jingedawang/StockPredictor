@@ -15,9 +15,12 @@ function App() {
             <Query />
             <Board />
           </Content>
-        <Footer className='footer'>author @Yifan Zou</Footer>
+        <Footer className='footer'>
+          <span>Author @Yifan Zou</span>
+          <a href='mailto: wjg172184@163.com'>Email</a>
+          <a href='https://github.com/jingedawang/StockPredictor' target="_blank">GitHub</a>
+        </Footer>
       </Layout>
-     
     </div>
   );
 }
