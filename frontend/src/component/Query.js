@@ -12,7 +12,7 @@ const key = [];
 export function Query() {
     const [select, setSelect] = useState(0);
     const onSelect = (id) => {
-      axios.get(`http://20.205.61.210:5000/stock/${id}`).then((res) => {
+      axios.get(`http://20.205.61.210:5000/stock/${id}?source=web`).then((res) => {
         if(res.data.history && res.data.history.length && Object.values(res.data.predict) && Object.values(res.data.predict).length) {
           const result = res.data.history.map(item => ({
             date: Object.keys(item)[0].replaceAll('-', ''),
@@ -49,7 +49,7 @@ export function Query() {
     const [predictData, setPredictData] = useState([]);
 
     useEffect(() => {
-      axios.get("http://20.205.61.210:5000/stock/list").then((res) => {
+      axios.get("http://20.205.61.210:5000/stock/list?source=web").then((res) => {
         setStocksList(res.data);
       })
     },[]);
