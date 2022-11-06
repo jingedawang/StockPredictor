@@ -7,11 +7,6 @@ import service
 
 
 app = Flask(__name__)
-CORS(app, resources=r'/*')
-app.logger.setLevel(logging.INFO)
-file_handler = logging.FileHandler(f'{app.name}.log')
-file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s: %(message)s"))
-app.logger.addHandler(file_handler)
 
 
 @app.route('/')
@@ -96,7 +91,7 @@ def predict(id: str):
         The history prices and the predicted price for the stock.
     """
     # Log the request information.
-    current_app.logger.info(f'Request {id} from {request.remote_addr} through {request.args.get("source", "api")}.')
+    app.logger.info(f'Request {id} from {request.remote_addr} through {request.args.get("source", "api")}.')
 
     # Check the input id.
     if not id.isdigit() or len(id) != 6:
@@ -149,7 +144,7 @@ def predict_in_date(id: str, date: str):
         The history prices and the predicted price for the stock at the specified date.
     """
     # Log the request information.
-    current_app.logger.info(f'Request {id}/{date} from {request.remote_addr}.')
+    app.logger.info(f'Request {id}/{date} from {request.remote_addr}.')
 
     # Check the input id and date strings.
     if not id.isdigit() or len(id) != 6:
@@ -170,4 +165,14 @@ def predict_in_date(id: str, date: str):
 
 
 if __name__ == '__main__':
+    # Enable cross-origin sharing.
+    CORS(app, resources=r'/*')
+
+    # Add file handler to the logger.
+    file_handler = logging.FileHandler(f'{app.name}.log')
+    file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s: %(message)s"))
+    app.logger.addHandler(file_handler)
+    app.logger.setLevel(logging.INFO)
+
+    # Start app.
     app.run(host='0.0.0.0')
