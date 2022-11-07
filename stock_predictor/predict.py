@@ -36,4 +36,9 @@ def predict(ids='all', start_date=None, end_date=None) -> pd.DataFrame:
     with R.start(experiment_name="stock_predictor", recorder_name='predict'):
         model = R.get_recorder(recorder_name='two_weeks_model').load_object("model.pkl")
         pred = model.predict(dataset)
-        return pred
+
+    # Set the predict recorder to deleted status.
+    recorder_id = R.get_recorder(experiment_name='stock_predictor', recorder_name='predict').id
+    R.get_exp(experiment_name='stock_predictor').delete_recorder(recorder_id=recorder_id)
+
+    return pred
