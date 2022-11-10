@@ -9,18 +9,33 @@ import qlib.data
 from tinydb import TinyDB, Query
 import tqdm
 
+from crawler import Crawler
 import predict
 from stock import Stock
 
 
 ## Define the database file name here.
 STOCK_DATABASE = Path('~/.stock/stock.json').expanduser()
+SH_STOCK_LIST_PATH = Path('~/.stock/sh_stock_list.xls').expanduser()
+SZ_STOCK_LIST_PATH = Path('~/.stock/sz_stock_list.xls').expanduser()
 
 
 def load_stock_list():
     """
     Load stock list from a csv file and insert the data into database.
     """
+    with Crawler() as cralwer:
+        cralwer.crawl_shanghai_stock_list(SH_STOCK_LIST_PATH)
+        shanghai_stock_list = pd.read_excel(SH_STOCK_LIST_PATH)
+        print(shanghai_stock_list)
+        cralwer.crawl_shenzhen_stock_list(SZ_STOCK_LIST_PATH)
+        shenzhen_stock_list = pd.read_excel(SZ_STOCK_LIST_PATH)
+        print(shenzhen_stock_list)
+
+
+    # TODO: Load stock list into database.
+    exit()
+
     os.makedirs(os.path.dirname(STOCK_DATABASE), exist_ok=True)
     database = TinyDB(STOCK_DATABASE)
 

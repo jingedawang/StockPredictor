@@ -5,3 +5,4 @@ flask-cors~=3.0.10
 openpyxl~=3.0.10
 pypinyin~=0.47.1
 tinydb~=4.7.0
+pytest-playwright
