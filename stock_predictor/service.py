@@ -9,29 +9,45 @@ import qlib.data
 from tinydb import TinyDB, Query
 import tqdm
 
+from crawler import Crawler
 import predict
 from stock import Stock
 
 
 ## Define the database file name here.
 STOCK_DATABASE = Path('~/.stock/stock.json').expanduser()
+SH_STOCK_LIST_PATH = Path('~/.stock/sh_stock_list.xls').expanduser()
+SZ_STOCK_LIST_PATH = Path('~/.stock/sz_stock_list.xls').expanduser()
 
 
 def load_stock_list():
     """
     Load stock list from a csv file and insert the data into database.
     """
+    # Crawl the stock list files from the official websites of stock exchanges.
+    with Crawler() as cralwer:
+        cralwer.crawl_shanghai_stock_list(SH_STOCK_LIST_PATH)
+        shanghai_stock_list = pd.read_excel(SH_STOCK_LIST_PATH, dtype=str)[['A股代码', '证券简称', '上市日期']]
+        cralwer.crawl_shenzhen_stock_list(SZ_STOCK_LIST_PATH)
+        shenzhen_stock_list = pd.read_excel(SZ_STOCK_LIST_PATH, dtype=str)[['A股代码', 'A股简称', 'A股上市日期']]
+
+    # Combine two stock lists.
+    shanghai_stock_list.columns = ['id', 'name', 'listing_date']
+    shanghai_stock_list['stock_exchange'] = 'SH'
+    shenzhen_stock_list.columns = ['id', 'name', 'listing_date']
+    shenzhen_stock_list['stock_exchange'] = 'SZ'
+    stock_list = pd.concat([shanghai_stock_list, shenzhen_stock_list])
+
+    # Load stock list into database.
+    print('Load stock list into database...')
     os.makedirs(os.path.dirname(STOCK_DATABASE), exist_ok=True)
     database = TinyDB(STOCK_DATABASE)
-
-    print('Load stock list into database...')
-    stock_list = pd.read_csv(os.path.dirname(__file__) + '/../data/stock_list.csv')
-    stock_list_with_progressbar = tqdm.tqdm(stock_list.iterrows(), total=stock_list.index.size)
+    stock_list_with_progressbar = tqdm.tqdm(stock_list.iterrows(), total=stock_list.shape[0])
+    query = Query()
     for _, row in stock_list_with_progressbar:
-        id = row['ts_code'][:-3]
+        id = row['id']
         name = row['name']
-        enname = row['enname']
-        qlib_id = row['ts_code'][-2:] + row['ts_code'][:6]
+        qlib_id = row['stock_exchange'] + row['id']
 
         # We need to translate the Chinese name of the stock to Pinyin and select the first Character of each word.
         # This will help users look up their stock rapidly.
@@ -42,10 +58,14 @@ def load_stock_list():
         for word in pinyin_list:
             pinyin_first_characters.append(word[0][0].upper())
         pinyin = "".join(pinyin_first_characters)
-        stock = Stock(id, pinyin, name, qlib_id, enname=enname)
-        stock_json = stock.to_dict()
-        query = Query()
-        database.upsert(stock_json, query.id == stock.id)
+
+        stock_json = {
+            'id': id,
+            'pinyin': pinyin,
+            'name': name,
+            'qlib_id': qlib_id
+        }
+        database.upsert(stock_json, query.id == id)
 
 def batch(iterable, n=1):
     """
@@ -71,7 +91,7 @@ def predict_all(date=None):
     database = TinyDB(STOCK_DATABASE)
     if date is None:
         date = '2022-01-01'
-    
+
     all_rows_in_database = database.all()
     with tqdm.tqdm(total=len(all_rows_in_database)) as progress_bar:
         for rows in batch(all_rows_in_database, 300):
@@ -92,7 +112,7 @@ def predict_all(date=None):
                         row['predict'].update(prediction.to_dict())
                     database.upsert(row, Query().id == row['id'])
             progress_bar.update(len(rows))
-    
+
 def get_stock_list() -> str:
     """
     Get the stock list from database.
@@ -103,8 +123,8 @@ def get_stock_list() -> str:
     database = TinyDB(STOCK_DATABASE)
     stocks = []
     for row in database.all():
-        # Only return following 4 fields for the request.
-        keep = ['id', 'pinyin', 'name', 'enname']
+        # Only return following 3 fields for the request.
+        keep = ['id', 'pinyin', 'name']
         filtered_stock_json = {key: row[key] for key in keep}
         stocks.append(filtered_stock_json)
     return json.dumps(stocks, ensure_ascii=False)

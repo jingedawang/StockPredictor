@@ -51,6 +51,8 @@ After that, clone this repository and install the dependencies.
 cd <your_workspace_dir>
 git clone https://github.com/jingedawang/StockPredictor.git && cd StockPredictor
 pip install -r stock_predictor/requirements.txt
+playwright install
+playwright install-deps
 ```
 
 Train a prediction model.
