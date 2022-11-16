@@ -45,27 +45,32 @@ def load_stock_list():
     stock_list_with_progressbar = tqdm.tqdm(stock_list.iterrows(), total=stock_list.shape[0])
     query = Query()
     for _, row in stock_list_with_progressbar:
-        id = row['id']
-        name = row['name']
-        qlib_id = row['stock_exchange'] + row['id']
-
         # We need to translate the Chinese name of the stock to Pinyin and select the first Character of each word.
         # This will help users look up their stock rapidly.
         # TODO: Need to confirm if there are problems of heteronym.
         # TODO: English characters are dropped by the pypinyin library.
-        pinyin_list = pypinyin.pinyin(name, style=pypinyin.NORMAL)
+        pinyin_list = pypinyin.pinyin(row['name'], style=pypinyin.NORMAL)
         pinyin_first_characters = []
         for word in pinyin_list:
             pinyin_first_characters.append(word[0][0].upper())
         pinyin = "".join(pinyin_first_characters)
 
         stock_json = {
-            'id': id,
+            'id': row['id'],
             'pinyin': pinyin,
-            'name': name,
-            'qlib_id': qlib_id
+            'name': row['name'],
+            'qlib_id': row['stock_exchange'] + row['id'],
+            'listing_date': row['listing_date'],
+            'delisted': False
         }
-        database.upsert(stock_json, query.id == id)
+        database.upsert(stock_json, query.id == row['id'])
+
+    # Mark a stock as delisted if it doesn't appear in the new stock list.
+    id_set = set(stock_list['id'])
+    for row in tqdm.tqdm(database.all()):
+        if row['id'] not in id_set:
+            row['delisted'] = True
+            database.upsert(row, query.id == row['id'])
 
 def batch(iterable, n=1):
     """
@@ -123,6 +128,10 @@ def get_stock_list() -> str:
     database = TinyDB(STOCK_DATABASE)
     stocks = []
     for row in database.all():
+        # Don't return delisted stock.
+        if row.get('delisted'):
+            continue
+
         # Only return following 3 fields for the request.
         keep = ['id', 'pinyin', 'name']
         filtered_stock_json = {key: row[key] for key in keep}
