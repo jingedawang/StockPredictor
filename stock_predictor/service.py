@@ -45,11 +45,14 @@ def load_stock_list():
     stock_list_with_progressbar = tqdm.tqdm(stock_list.iterrows(), total=stock_list.shape[0])
     query = Query()
     for _, row in stock_list_with_progressbar:
+        # Remove spaces in name.
+        name = row['name'].replace(' ', '')
+
         # We need to translate the Chinese name of the stock to Pinyin and select the first Character of each word.
         # This will help users look up their stock rapidly.
         # TODO: Need to confirm if there are problems of heteronym.
         # TODO: English characters are dropped by the pypinyin library.
-        pinyin_list = pypinyin.pinyin(row['name'], style=pypinyin.NORMAL)
+        pinyin_list = pypinyin.pinyin(name, style=pypinyin.NORMAL)
         pinyin_first_characters = []
         for word in pinyin_list:
             pinyin_first_characters.append(word[0][0].upper())
@@ -58,7 +61,7 @@ def load_stock_list():
         stock_json = {
             'id': row['id'],
             'pinyin': pinyin,
-            'name': row['name'],
+            'name': name,
             'qlib_id': row['stock_exchange'] + row['id'],
             'listing_date': row['listing_date'],
             'delisted': False
@@ -111,7 +114,7 @@ def predict_all(date=None):
                     prediction = predictions.loc[(slice(None), row['qlib_id']),].droplevel('instrument')
                     prediction.index = prediction.index.map(lambda timestamp: timestamp.strftime('%Y-%m-%d'))
                     # Update the row with the prediction.
-                    if row['predict'] is None:
+                    if row.get('predict') is None:
                         row['predict'] = prediction.to_dict()
                     else:
                         row['predict'].update(prediction.to_dict())
