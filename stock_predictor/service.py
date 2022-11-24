@@ -1,4 +1,5 @@
 import datetime
+from itertools import chain
 import json
 import math
 import os
@@ -51,12 +52,8 @@ def load_stock_list():
         # We need to translate the Chinese name of the stock to Pinyin and select the first Character of each word.
         # This will help users look up their stock rapidly.
         # TODO: Need to confirm if there are problems of heteronym.
-        # TODO: English characters are dropped by the pypinyin library.
-        pinyin_list = pypinyin.pinyin(name, style=pypinyin.NORMAL)
-        pinyin_first_characters = []
-        for word in pinyin_list:
-            pinyin_first_characters.append(word[0][0].upper())
-        pinyin = "".join(pinyin_first_characters)
+        pinyin_lists = pypinyin.pinyin(name, style=pypinyin.FIRST_LETTER)
+        pinyin = ''.join(list(chain(*pinyin_lists))).upper()
 
         stock_json = {
             'id': row['id'],
