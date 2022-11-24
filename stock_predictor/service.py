@@ -182,7 +182,7 @@ def get_history_and_predict_result(id: str, date: str) -> str:
         matched_rows[0]['pinyin'],
         matched_rows[0]['name'],
         qlib_id,
-        enname=matched_rows[0]['enname'],
+        enname=matched_rows[0].get('enname'),
         history=history,
         predict={predicted_trading_date: predicted_price}
     )
