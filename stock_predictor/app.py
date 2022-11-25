@@ -150,10 +150,10 @@ def predict_in_date(id: str, date: str):
     if not id.isdigit() or len(id) != 6:
         return f'Error parameter: {id} is not a valid stock id.'
     try:
-        datetime.datetime.strptime(date, '%Y-%m-%d')
+        date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
     except ValueError:
         return f'Error parameter: {date} is not a valid date.'
-    if datetime.datetime.strptime(date, '%Y-%m-%d') > datetime.datetime.now():
+    if date_obj > datetime.datetime.now():
         return f'Error parameter: Future date {date} is not supported.'
 
     # Call service to fetch the history and prediction for the given date.

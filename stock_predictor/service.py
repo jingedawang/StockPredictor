@@ -164,8 +164,9 @@ def get_history_and_predict_result(id: str, date: str) -> str:
     history = [{key[1].strftime('%Y-%m-%d'): round(value, 2)} for key, value in history_data.to_dict()['$close/$factor'].items() if not math.isnan(value)]
 
     # Get predicted price.
+    predicted_trading_date = None
     predicted_price = None
-    if matched_rows[0]['predict'] is not None:
+    if matched_rows[0].get('predict') is not None:
         latest_trading_date = list(history[-1].keys())[0]
         latest_price = history[-1][latest_trading_date]
         # If the history prices have updated but the predictions are not updated yet, keep showing lastday's result to users.
@@ -175,6 +176,8 @@ def get_history_and_predict_result(id: str, date: str) -> str:
         predicted_trading_date = (pd.Timestamp(latest_trading_date) + pd.Timedelta(days=14)).strftime("%Y-%m-%d")
         if latest_trading_date in matched_rows[0]['predict']:
             predicted_price = round((1.0 + matched_rows[0]['predict'][latest_trading_date]) * latest_price, 2)
+    if predicted_trading_date is None or predicted_price is None:
+        raise LookupError(f'Stock {id} is not supported yet.')
 
     # Create Stock object and convert it to json string
     stock = Stock(
@@ -182,7 +185,7 @@ def get_history_and_predict_result(id: str, date: str) -> str:
         matched_rows[0]['pinyin'],
         matched_rows[0]['name'],
         qlib_id,
-        enname=matched_rows[0]['enname'],
+        enname=matched_rows[0].get('enname'),
         history=history,
         predict={predicted_trading_date: predicted_price}
     )
