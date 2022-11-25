@@ -205,13 +205,10 @@ You can also try our deployed website here http://20.205.61.210:3000/.
 
 ### What can I contribute?
 
-It's always welcomed to join us as a developer. Please check [Stock Prediction](https://github.com/users/jingedawang/projects/2) project and see what you could do.
+It's always welcomed to join us as a developer.
+Please check [Issues](https://github.com/jingedawang/StockPredictor/issues) tab and see if there are anything you could contribute.
 
-Currently, we are in Iteration Hachthon (8/15/2022 to 9/26/2022).
-Our first goal is to develop an initial version of StockPredictor, which could tell us how much the price will be in the next two weeks.
-
-If you don't like our development plan but have good ideas about this project, please create an issue.
-We are happy to merge good implementations.
+If you have any ideas, please feel free to leave them in an issue.
 
 ### Resources
 
