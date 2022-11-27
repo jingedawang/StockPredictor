@@ -1,8 +1,6 @@
 from playwright.sync_api import sync_playwright
 
-
-SHANGHAI_STOCK_EXCHANGE_URL = 'http://www.sse.com.cn/assortment/stock/list/share/'
-SHENZHEN_STOCK_EXCHANGE_URL = 'http://www.szse.cn/market/product/stock/list/index.html'
+import constants
 
 
 class Crawler:
@@ -71,7 +69,7 @@ class Crawler:
         Crawl the stock list Excel file from Shanghai Stock Exchange.
         """
         page = self.context.new_page()
-        page.goto(SHANGHAI_STOCK_EXCHANGE_URL)
+        page.goto(constants.SHANGHAI_STOCK_EXCHANGE_URL)
         with page.expect_download() as download_info:
             page.click('.tableDownload')
         download_info.value.save_as(save_path)
@@ -82,7 +80,7 @@ class Crawler:
         Crawl the stock list Excel file from Shenzhen Stock Exchange.
         """
         page = self.context.new_page()
-        page.goto(SHENZHEN_STOCK_EXCHANGE_URL)
+        page.goto(constants.SHENZHEN_STOCK_EXCHANGE_URL)
         with page.expect_download() as download_info:
             page.click('.btn-default-excel')
         download_info.value.save_as(save_path)
