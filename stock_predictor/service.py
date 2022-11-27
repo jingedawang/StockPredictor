@@ -16,8 +16,16 @@ from stock import Stock
 
 
 class Service:
+    """
+    Backend service class.
+
+    This class provides all the necessary methods for the web app.
+    """
 
     def __init__(self) -> None:
+        """
+        Initialize service.
+        """
         self.database = Database()
 
     def load_stock_list(self) -> None:
