@@ -3,7 +3,7 @@ Predict the stock price with AI models.
 
 This is the main repository of the [Stock Prediction](https://github.com/users/jingedawang/projects/2) project, which starts as an [internal project](https://hackbox.microsoft.com/project/597) in Microsoft Hackthon 2022.
 
-For investors, please try our online web service: http://20.205.61.210:3000/ <br>
+For investors, please try our online web service: http://stockprediction.org/ <br>
 For investigators, please follow the Quick Start to learn more.
 
 ## Background
@@ -85,8 +85,8 @@ python stock_predictor/app.py
 ### Web API
 
 Once the prediction service started, you could send requests to the following methods.
-Note that 20.205.61.210 is our public server address, we have deployed an app here already.
-You could test the web API on your own machine and compare it with the public one.
+Note that stockprediction.org is our public server address, we have deployed an app here already.
+You could test the web API on your own machine if you replaced the domain to your address.
 
 #### API 1: Get stock list
 ```
@@ -94,7 +94,7 @@ Url: /stock/list
 Description: Get the stock list in China market.
 Parameter: None
 Response: A JSON string.
-Example for request http://20.205.61.210:5000/stock/list:
+Example for request http://stockprediction.org:5000/stock/list:
 [
 	{
 		"id": "000001",
@@ -122,7 +122,7 @@ Url: /stock/<id>
 Description: Predict the after-two-weeks price for the specified stock.
 Parameter: <id>: The id of the stock.
 Response: A JSON string containing both history prices and predicted price.
-Example for request http://20.205.61.210:5000/stock/600000:
+Example for request http://stockprediction.org:5000/stock/600000:
 {
 	"id": "600000",
 	"pinyin": "PFYH",
@@ -156,7 +156,7 @@ Parameter:
     <id>: The id of the stock.
     <date>: The date when performs the prediction.
 Response: A JSON string containing both history prices and predicted price for the prediction.
-Example for request http://20.205.61.210:5000/stock/600000/2022-04-29:
+Example for request http://stockprediction.org:5000/stock/600000/2022-04-29:
 {
 	"id": "600000",
 	"pinyin": "PFYH",
@@ -199,7 +199,7 @@ Then go to http://localhost:3000/ and choose the stock you like.
 The webpage should looks like
 ![](data/demo-page.png)
 
-You can also try our deployed website here http://20.205.61.210:3000/.
+You can also try our public website here http://stockprediction.org/.
 
 ## Contribute
 
