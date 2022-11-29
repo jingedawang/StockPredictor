@@ -3,10 +3,11 @@ import json
 import tqdm
 import unittest
 
-from context import service
+import context
+from service import Service
 
 
-class TestServices(unittest.TestCase):
+class TestService(unittest.TestCase):
     """
     Tests for stock predictor services.
 
@@ -14,8 +15,11 @@ class TestServices(unittest.TestCase):
     These tests are more like integrated test than unit tests.
     """
 
+    def setUp(self) -> None:
+        self.service = Service()
+
     def test_get_stock_list(self):
-        stock_list_json = service.get_stock_list()
+        stock_list_json = self.service.get_stock_list()
         stock_list = json.loads(stock_list_json)
         for stock in stock_list:
             self.assertTrue(stock['id'].isdigit() and len(stock['id']) == 6, msg=f'{stock["id"]} is not 6-width digit.')
@@ -23,11 +27,11 @@ class TestServices(unittest.TestCase):
             self.assertTrue(len(stock['pinyin']) == len(stock['pinyin']), msg=f'Pinyin {stock["pinyin"]} has different length with name {stock["name"]}')
 
     def test_get_history_and_predict_result(self):
-        stock_list_json = service.get_stock_list()
+        stock_list_json = self.service.get_stock_list()
         stock_list = json.loads(stock_list_json)
         for stock in tqdm.tqdm(stock_list):
             try:
-                history_and_predict_result_json = service.get_history_and_predict_result(stock['id'], datetime.date.today().strftime('%Y-%m-%d'))
+                history_and_predict_result_json = self.service.get_history_and_predict_result(stock['id'], datetime.date.today().strftime('%Y-%m-%d'))
             except LookupError:
                 continue
             history_and_predict_result = json.loads(history_and_predict_result_json)

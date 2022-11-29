@@ -1,12 +1,13 @@
 import datetime
-from flask import current_app, Flask, request
+from flask import Flask, request
 from flask_cors import CORS
 import logging
 
-import service
+from service import Service
 
 
 app = Flask(__name__)
+service = Service()
 
 
 @app.route('/')
