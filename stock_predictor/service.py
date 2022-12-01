@@ -173,16 +173,18 @@ class Service:
         predicted_trading_date = None
         predicted_price = None
         if stock.predict is not None:
-            latest_trading_date = list(history[-1].keys())[0]
-            latest_price = history[-1][latest_trading_date]
-            # If the history prices have updated but the predictions are not updated yet, keep showing lastday's result to users.
-            if latest_trading_date not in stock.predict:
-                latest_trading_date = list(history[-2].keys())[0]
-                latest_price = history[-2][latest_trading_date]
+            latest_trading_date = None
+            offset = 0
+            while latest_trading_date not in stock.predict:
+                # Find the latest supported trading date.
+                # Ideally, latest supported trading date should be today (if today's stock market has closed) or yesterday (if today's stock market has not closed).
+                # But if there is any unexpected circumstance that yesterday's data is missing, we need to use former data instead.
+                offset -= 1
+                latest_trading_date = list(history[offset].keys())[0]
+            latest_price = history[offset][latest_trading_date]
             predicted_trading_date = (pd.Timestamp(latest_trading_date) + pd.Timedelta(days=14)).strftime("%Y-%m-%d")
-            if latest_trading_date in stock.predict:
-                predicted_price = round((1.0 + stock.predict[latest_trading_date]) * latest_price, 2)
-        if predicted_trading_date is None or predicted_price is None:
+            predicted_price = round((1.0 + stock.predict[latest_trading_date]) * latest_price, 2)
+        else:
             raise LookupError(f'Stock {id} is not supported yet.')
 
         # Return the necessary values of the stock and convert it to json string.
