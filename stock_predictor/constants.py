@@ -15,3 +15,9 @@ SHANGHAI_STOCK_EXCHANGE_URL = 'http://www.sse.com.cn/assortment/stock/list/share
 
 # URL of Shenzhen stock list webpage.
 SHENZHEN_STOCK_EXCHANGE_URL = 'http://www.szse.cn/market/product/stock/list/index.html'
+
+# The date we start to support predicting.
+START_PREDICTING_DATE = '2022-01-01'
+
+# Path of Qlib data.
+QLIB_DATA_PATH = '~/.qlib/qlib_data/cn_data'
