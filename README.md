@@ -188,7 +188,7 @@ We also provide a web app to make this service convenient for users.
 
 Run following commands to start it.
 ```bash
-curl -sL https://deb.nodesource.com/setup_16.x | sudo bash -
+curl -sL https://deb.nodesource.com/setup_14.x | sudo bash -
 sudo apt-get install -y nodejs
 cd frontend
 npm install
@@ -196,7 +196,7 @@ npm run build
 serve -s build
 ```
 Then go to http://localhost:3000/ and choose the stock you like.
-The webpage should looks like
+The webpage should look like
 ![](data/demo-page.png)
 
 You can also try our public website here http://stockprediction.org/.

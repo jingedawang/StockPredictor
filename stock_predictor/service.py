@@ -108,7 +108,7 @@ class Service:
 
         all_stocks_in_database = self.database.all()
         with tqdm.tqdm(total=len(all_stocks_in_database)) as progress_bar:
-            for stocks in self.batch(all_stocks_in_database, 300):
+            for stocks in self.batch(all_stocks_in_database, 200):
                 # Predict a batch of stocks in one forward pass.
                 predictions = predict.predict([stock.qlib_id for stock in stocks], start_date=date, end_date=datetime.date.today().strftime('%Y-%m-%d'))
                 if not predictions.empty:
