@@ -192,10 +192,9 @@ curl -sL https://deb.nodesource.com/setup_14.x | sudo bash -
 sudo apt-get install -y nodejs
 cd frontend
 npm install
-npm run build
-serve -s build
+sudo PORT=80 npm start
 ```
-Then go to http://localhost:3000/ and choose the stock you like.
+Then go to http://localhost/ and choose the stock you like.
 The webpage should look like
 ![](data/demo-page.png)
 
