@@ -11,6 +11,7 @@ tmux send-keys -t webapp 'sudo PORT=80 npm start' Enter
 
 # Create tmux session update-data
 tmux new -s update-data -d
+tmux send-keys -t update-data 'conda activate py38' Enter
 
 # Install crontab list
 crontab ~/projects/StockPredictor/config/update_data.crontab
