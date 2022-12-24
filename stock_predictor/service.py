@@ -29,6 +29,11 @@ class Service:
         qlib.init(provider_uri=constants.QLIB_DATA_PATH)
         self.database = Database()
 
+        # TODO: Temparory code. Use cached stock list to avoid the big latency for users.
+        # This should be removed once we changed to better database.
+        self.stock_list = None
+        self.stock_list = self.get_stock_list()
+
     def load_stock_list(self) -> None:
         """
         Load stock list from official stock exchange website and update the database.
@@ -186,6 +191,11 @@ class Service:
         Returns:
             The JSON string of the stock list.
         """
+        # TODO: Temparory code. Use cached stock list to avoid the big latency for users.
+        # This should be removed once we changed to better database.
+        if self.stock_list is not None:
+            return self.stock_list
+
         stocks = []
         for stock in self.database.all():
             # Don't return delisted stock.
