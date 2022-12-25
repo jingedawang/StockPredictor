@@ -205,7 +205,7 @@ class Service:
         """
         Fix the missing data by re-downloading them.
         """
-        missing_date = set()
+        common_missing_dates = None
         for stock in self.database.all():
             # Skip the delisted stocks.
             if stock.delisted:
@@ -213,18 +213,29 @@ class Service:
 
             # Put date with missing data into a set.
             features = qlib.data.D.features([stock.qlib_id], ['$close'], constants.START_PREDICTING_DATE, datetime.date.today().strftime('%Y-%m-%d'))
+            # Skip the stock if it has no qlib data.
+            if len(features.index) == 0:
+                continue
             nan_features = features[features.isna().any(axis=1)]
-            for index in nan_features.index:
-                missing_date.add(index[1])
-        # Sort the missing dates.
-        sorted_missing_date = sorted(missing_date)
 
-        if len(sorted_missing_date) > 0:
+            missing_dates = set()
+            for index in nan_features.index:
+                missing_dates.add(index[1])
+            # Get the common missing dates among all the stocks.
+            if common_missing_dates is None:
+                common_missing_dates = missing_dates
+            else:
+                common_missing_dates.intersection_update(missing_dates)
+        # Sort the missing dates.
+        sorted_missing_dates = sorted(common_missing_dates)
+
+        if len(sorted_missing_dates) > 0:
             # Aggregate the missing dates into durations.
             durations = []
-            start_date = sorted_missing_date[0]
-            end_date = sorted_missing_date[0]
-            for missing_date in sorted_missing_date:
+            start_date = sorted_missing_dates[0]
+            end_date = sorted_missing_dates[0]
+            for missing_date in sorted_missing_dates:
+                # Cluster the missing dates into one duration if the interval is less than 5 days.
                 if (missing_date - end_date).days < 5:
                     end_date = missing_date
                 else:
