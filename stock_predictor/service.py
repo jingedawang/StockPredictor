@@ -275,6 +275,13 @@ class Service:
         # Predict for each stock's each missing duration and update them into database.
         for duration in tqdm.tqdm(durations):
             stock = duration[0]
+
+            # Skip the duration if there is no price data in qlib data.
+            # It may because the stock is suspended during this time.
+            features_in_duration = qlib.data.D.features([stock.qlib_id], ['$close'], duration[1], duration[2])
+            if len(features_in_duration.index) == 0:
+                continue
+
             predictions = predict.predict([stock.qlib_id], start_date=duration[1], end_date=duration[2])
             if not predictions.empty:
                 # Check if the result exists.
