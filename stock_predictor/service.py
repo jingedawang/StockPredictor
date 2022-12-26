@@ -2,6 +2,7 @@ import datetime
 from itertools import chain
 import json
 import math
+import os
 import pandas as pd
 import pypinyin
 import qlib.data
@@ -132,58 +133,6 @@ class Service:
                         self.database.upsert(stock)
                 progress_bar.update(len(stocks))
 
-    def fix_mising_prediction(self) -> None:
-        """
-        Fix the missing predictions.
-
-        Due to some special circumstances, the daily prediction may fail or break.
-        We could fix those missing predictions by finding them and re-predict them in this method.
-        """
-        missed_durations = []
-        for stock in self.database.all():
-            # If no prediction in current stock, it may be not supported by our data source. We just skip it.
-            if stock.predict is None:
-                continue
-
-            # Select the date durations that missing a series of consecutive predictions and save them as a tuple.
-            supported_trading_days = qlib.data.D.calendar(start_time=constants.START_PREDICTING_DATE, end_time=datetime.date.today().strftime('%Y-%m-%d'))
-            start_date = None
-            end_date = None
-            for trading_day in supported_trading_days:
-                date = trading_day.strftime('%Y-%m-%d')
-                if date not in stock.predict:
-                    # Record the start date and the end date of one duration.
-                    if start_date is None:
-                        start_date = date
-                    end_date = date
-                else:
-                    # Complete the duration and reset the start date and the end date.
-                    if start_date is not None and end_date is not None:
-                        missed_durations.append((stock, start_date, end_date))
-                        start_date = None
-                        end_date = None
-            # Don't miss the final duration.
-            if start_date is not None and end_date is not None:
-                missed_durations.append((stock, start_date, end_date))
-
-        # Predict for each stock's each missing duration and update them into database.
-        for missed_duration in tqdm.tqdm(missed_durations):
-            stock = missed_duration[0]
-            predictions = predict.predict([stock.qlib_id], start_date=missed_duration[1], end_date=missed_duration[2])
-            if not predictions.empty:
-                # Check if the result exists.
-                if not predictions.index.isin([stock.qlib_id], level='instrument').any():
-                    continue
-                # Select the prediction for this stock.
-                prediction = predictions.loc[(slice(None), stock.qlib_id),].droplevel('instrument')
-                prediction.index = prediction.index.map(lambda timestamp: timestamp.strftime('%Y-%m-%d'))
-                # Update the stock with the prediction.
-                if stock.predict is None:
-                    stock.predict = prediction.to_dict()
-                else:
-                    stock.predict.update(prediction.to_dict())
-                self.database.upsert(stock)
-
     def get_stock_list(self) -> str:
         """
         Get the stock list from database.
@@ -251,3 +200,110 @@ class Service:
         stock.history = history
         stock.predict = {predicted_trading_date: predicted_price}
         return stock.to_json(ensure_ascii=False)
+
+    def fix_missing_data(self) -> None:
+        """
+        Fix the missing data by re-downloading them.
+        """
+        common_missing_dates = None
+        for stock in self.database.all():
+            # Skip the delisted stocks.
+            if stock.delisted:
+                continue
+
+            # Put date with missing data into a set.
+            features = qlib.data.D.features([stock.qlib_id], ['$close'], constants.START_PREDICTING_DATE, datetime.date.today().strftime('%Y-%m-%d'))
+            # Skip the stock if it has no qlib data.
+            if len(features.index) == 0:
+                continue
+            nan_features = features[features.isna().any(axis=1)]
+
+            missing_dates = set()
+            for index in nan_features.index:
+                missing_dates.add(index[1])
+            # Get the common missing dates among all the stocks.
+            if common_missing_dates is None:
+                common_missing_dates = missing_dates
+            else:
+                common_missing_dates.intersection_update(missing_dates)
+        # Sort the missing dates.
+        sorted_missing_dates = sorted(common_missing_dates)
+
+        if len(sorted_missing_dates) > 0:
+            # Aggregate the missing dates into durations.
+            durations = []
+            start_date = sorted_missing_dates[0]
+            end_date = sorted_missing_dates[0]
+            for missing_date in sorted_missing_dates:
+                # Cluster the missing dates into one duration if the interval is less than 5 days.
+                if (missing_date - end_date).days < 5:
+                    end_date = missing_date
+                else:
+                    durations.append((start_date, end_date))
+                    start_date = missing_date
+                    end_date = missing_date
+            durations.append((start_date, end_date))
+
+            # Download data for each duration. This will take much time.
+            for duration in durations:
+                command_line = f'python ~/projects/qlib/scripts/data_collector/yahoo/collector.py update_data_to_bin --qlib_data_1d_dir ~/.qlib/qlib_data/cn_data --trading_date {duration[0].strftime("%Y-%m-%d")} --end_date {(duration[1] + pd.Timedelta(days=1)).strftime("%Y-%m-%d")}'
+                os.system(command_line)
+
+    def fix_mising_prediction(self) -> None:
+        """
+        Fix the missing predictions.
+
+        Due to some special circumstances, the daily prediction may fail or break.
+        We could fix those missing predictions by finding them and re-predict them in this method.
+        """
+        durations = []
+        for stock in self.database.all():
+            # If no prediction in current stock, it may be not supported by our data source. We just skip it.
+            if stock.predict is None:
+                continue
+
+            # Select the date durations that missing a series of consecutive predictions and save them as a tuple.
+            supported_trading_days = qlib.data.D.calendar(start_time=constants.START_PREDICTING_DATE, end_time=datetime.date.today().strftime('%Y-%m-%d'))
+            start_date = None
+            end_date = None
+            for trading_day in supported_trading_days:
+                date = trading_day.strftime('%Y-%m-%d')
+                if date not in stock.predict:
+                    # Record the start date and the end date of one duration.
+                    if start_date is None:
+                        start_date = date
+                    end_date = date
+                else:
+                    # Complete the duration and reset the start date and the end date.
+                    if start_date is not None and end_date is not None:
+                        durations.append((stock, start_date, end_date))
+                        start_date = None
+                        end_date = None
+            # Don't miss the final duration.
+            if start_date is not None and end_date is not None:
+                durations.append((stock, start_date, end_date))
+
+        # Predict for each stock's each missing duration and update them into database.
+        for duration in tqdm.tqdm(durations):
+            stock = duration[0]
+
+            # Skip the duration if there is no price data in qlib data.
+            # It may because the stock is suspended during this time.
+            features_in_duration = qlib.data.D.features([stock.qlib_id], ['$close'], duration[1], duration[2])
+            if len(features_in_duration.index) == 0:
+                continue
+
+            predictions = predict.predict([stock.qlib_id], start_date=duration[1], end_date=duration[2])
+            if not predictions.empty:
+                # Check if the result exists.
+                if not predictions.index.isin([stock.qlib_id], level='instrument').any():
+                    continue
+                # Select the prediction for this stock.
+                prediction = predictions.loc[(slice(None), stock.qlib_id),].droplevel('instrument')
+                prediction.index = prediction.index.map(lambda timestamp: timestamp.strftime('%Y-%m-%d'))
+                # Update the stock with the prediction.
+                if stock.predict is None:
+                    stock.predict = prediction.to_dict()
+                else:
+                    stock.predict.update(prediction.to_dict())
+                self.database.upsert(stock)

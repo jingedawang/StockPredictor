@@ -6,5 +6,7 @@
 0 10 * * 6 tmux send-keys -t update-data 'cd ~/projects/StockPredictor && mlflow gc' Enter
 # Update stock list every week.
 0 11 * * 6 tmux send-keys -t update-data 'cd ~/projects/StockPredictor && python stock_predictor/tools.py update_stock_list' Enter
+# Fix missing data every week.
+0 13 * * 6 tmux send-keys -t update-data 'cd ~/projects/StockPredictor && python stock_predictor/tools.py fix_missing_data' Enter
 # Fix missing predictions every week.
-0 16 * * 6 tmux send-keys -t update-data 'cd ~/projects/StockPredictor && python stock_predictor/tools.py fix_missing_prediction' Enter
+0 19 * * 6 tmux send-keys -t update-data 'cd ~/projects/StockPredictor && python stock_predictor/tools.py fix_missing_prediction' Enter
