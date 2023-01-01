@@ -314,5 +314,7 @@ class Service:
 
         This method should be called when the data is updated by external processes.
         """
+        # Refresh the qlib data.
         qlib.init(provider_uri=constants.QLIB_DATA_PATH)
+        # Refresh the predictions.
         self.database.refresh()
