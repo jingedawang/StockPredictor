@@ -307,3 +307,12 @@ class Service:
                 else:
                     stock.predict.update(prediction.to_dict())
                 self.database.upsert(stock)
+
+    def refresh_data(self) -> None:
+        """
+        Refresh the underlying data.
+
+        This method should be called when the data is updated by external processes.
+        """
+        qlib.init(provider_uri=constants.QLIB_DATA_PATH)
+        self.database.refresh()

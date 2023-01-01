@@ -164,6 +164,13 @@ def predict_in_date(id: str, date: str):
         return f'Error parameter: Stock {id} is invalid or not supported yet.'
     return result
 
+@app.route('/stock/update')
+def update():
+    """
+    Notify the backend service that the data has been updated.
+    """
+    service.refresh_data()
+    return 'Data updated.'
 
 if __name__ == '__main__':
     # Enable cross-origin sharing.

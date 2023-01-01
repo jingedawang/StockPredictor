@@ -31,11 +31,6 @@ class Database:
         """
         Search a stock with given id.
         """
-        # TODO: This is a temparory code. Currently, our page visits are not huge enough to refresh the cache frequently.
-        # When the data is updated, the cache are still there. This line disables the cache, which could fix this problem
-        # with a cost of longer latency.
-        self.database.clear_cache()
-
         matched_rows = self.database.search(Query().id == id)
         if len(matched_rows) == 1:
             return Stock.from_dict(matched_rows[0])
@@ -52,3 +47,12 @@ class Database:
         """
         stock_dict = {key: value for key, value in stock.to_dict().items() if value is not None}
         self.database.upsert(stock_dict, self.query.id == stock.id)
+
+    def refresh(self) -> None:
+        """
+        Refresh the data by clearing the cache.
+
+        The cache is not updated if the data is modified by another process.
+        So we need to call this method manually.
+        """
+        self.database.clear_cache()
