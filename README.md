@@ -55,6 +55,19 @@ playwright install
 playwright install-deps
 ```
 
+Since we use MongoDB to host our predictions, run following commands to install and start MongoDB service.
+
+```bash
+# Install MongoDB.
+# Following commands are for Ubuntu 20.04, change "focal" to other name if you are using other Ubuntu versions.
+wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+sudo apt-get update
+sudo apt-get install -y mongodb-org
+# Start MongoDB.
+sudo systemctl start mongod
+```
+
 Train a prediction model.
 ```bash
 python stock_predictor/train_two_week_predictor.py
