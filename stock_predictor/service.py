@@ -11,7 +11,7 @@ from typing import Iterable
 
 import constants
 from crawler import Crawler
-from database import Database
+from database import TinyDatabase
 import predict
 from stock import Stock
 
@@ -28,7 +28,7 @@ class Service:
         Initialize service.
         """
         qlib.init(provider_uri=constants.QLIB_DATA_PATH)
-        self.database = Database()
+        self.database = TinyDatabase()
 
         # TODO: Temparory code. Use cached stock list to avoid the big latency for users.
         # This should be removed once we changed to better database.
