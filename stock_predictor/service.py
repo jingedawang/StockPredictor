@@ -30,8 +30,7 @@ class Service:
         qlib.init(provider_uri=constants.QLIB_DATA_PATH)
         self.database = MongoDatabase()
 
-        # TODO: Temparory code. Use cached stock list to avoid the big latency for users.
-        # This should be removed once we changed to better database.
+        # Cache the stock list to avoid latency.
         self.stock_list = None
         self.stock_list = self.get_stock_list()
 
@@ -140,8 +139,7 @@ class Service:
         Returns:
             The JSON string of the stock list.
         """
-        # TODO: Temparory code. Use cached stock list to avoid the big latency for users.
-        # This should be removed once we changed to better database.
+        # Return the cached stock list if it exsits.
         if self.stock_list is not None:
             return self.stock_list
 
@@ -318,3 +316,6 @@ class Service:
         qlib.init(provider_uri=constants.QLIB_DATA_PATH)
         # Refresh the predictions.
         self.database.refresh()
+        # Refresh stock list
+        self.stock_list = None
+        self.stock_list = self.get_stock_list()
