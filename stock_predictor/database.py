@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import os
 import pymongo
 from typing import List, Optional
@@ -7,31 +8,35 @@ import constants
 from stock import Stock
 
 
-class Database:
+class Database(ABC):
     """
     The universal database interface for stock predictor.
 
     This class simplifies the database operation to object level.
     """
 
+    @abstractmethod
     def __init__(self) -> None:
         """
         Initialize database.
         """
         pass
 
+    @abstractmethod
     def all(self) -> List[Stock]:
         """
         Get all the stocks in the database.
         """
         pass
 
+    @abstractmethod
     def search(self, id: str) -> Optional[Stock]:
         """
         Search a stock with given id.
         """
         pass
 
+    @abstractmethod
     def upsert(self, stock: Stock) -> None:
         """
         Update or insert the stock into database.
@@ -40,12 +45,14 @@ class Database:
         """
         pass
 
+    @abstractmethod
     def refresh(self) -> None:
         """
         Refresh the data in database.
         """
         pass
 
+    @abstractmethod
     def close(self) -> None:
         """
         Close the database and release resources.
