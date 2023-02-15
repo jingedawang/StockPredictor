@@ -216,13 +216,13 @@ class Service:
         recent_2nd_trading_date = recent_3_trading_days[1].strftime("%Y-%m-%d")
         recent_3rd_trading_date = recent_3_trading_days[0].strftime("%Y-%m-%d")
 
-        if self.topN_date is None or self.topN_date < yesterday_date:
+        if self.topN_date is None or self.topN_date < recent_3_trading_days[2]:
             stocks = [stock for stock in self.database.all() if stock.predict is not None and recent_1st_trading_date in stock.predict.keys() and recent_2nd_trading_date in stock.predict.keys() and recent_3rd_trading_date in stock.predict.keys()]
             stocks.sort(key=lambda stock: stock.predict[recent_1st_trading_date] + stock.predict[recent_2nd_trading_date] + stock.predict[recent_3rd_trading_date], reverse=True)
             topN_stocks = [stock for stock in stocks[:n]]
 
             self.topN = []
-            self.topN_date = recent_1st_trading_date
+            self.topN_date = recent_3_trading_days[2]
             for stock in topN_stocks:
                 stock_dict = {
                     'id': stock.id,
