@@ -34,6 +34,10 @@ class Service:
         self.stock_list = None
         self.stock_list = self.get_stock_list()
 
+        # Cache the topN stocks.
+        self.topN = None
+        self.topN_date = None
+
     def load_stock_list(self) -> None:
         """
         Load stock list from official stock exchange website and update the database.
@@ -198,6 +202,35 @@ class Service:
         stock.history = history
         stock.predict = {predicted_trading_date: predicted_price}
         return stock.to_json(ensure_ascii=False)
+
+    def get_topN(self, n: int):
+        """
+        Get the most recommended N stocks.
+
+        We implemented this method by choosing the top N stocks that have highest increase in the following 2 weeks according to our prediction.
+        To make the recommendation more reliable, we choose the stocks that have good consistency in the recent 3 predictions. So the final result may not have the biggest increase, but is more likely to increase.
+        """
+        yesterday_date = pd.Timestamp.now().date() - pd.Timedelta(days=1)
+        recent_3_trading_days = qlib.data.D.calendar(start_time=(yesterday_date - pd.Timedelta(days=12)).strftime("%Y-%m-%d"), end_time=yesterday_date)[-3:]
+        recent_1st_trading_date = recent_3_trading_days[2].strftime("%Y-%m-%d")
+        recent_2nd_trading_date = recent_3_trading_days[1].strftime("%Y-%m-%d")
+        recent_3rd_trading_date = recent_3_trading_days[0].strftime("%Y-%m-%d")
+
+        if self.topN_date is None or self.topN_date < yesterday_date:
+            stocks = [stock for stock in self.database.all() if stock.predict is not None and recent_1st_trading_date in stock.predict.keys() and recent_2nd_trading_date in stock.predict.keys() and recent_3rd_trading_date in stock.predict.keys()]
+            stocks.sort(key=lambda stock: stock.predict[recent_1st_trading_date] + stock.predict[recent_2nd_trading_date] + stock.predict[recent_3rd_trading_date], reverse=True)
+            topN_stocks = [stock for stock in stocks[:n]]
+
+            self.topN = []
+            self.topN_date = recent_1st_trading_date
+            for stock in topN_stocks:
+                stock_dict = {
+                    'id': stock.id,
+                    'name': stock.name,
+                    'increase': round(stock.predict[recent_1st_trading_date], 4)
+                }
+                self.topN.append(stock_dict)
+        return json.dumps(self.topN, ensure_ascii=False)
 
     def fix_missing_data(self) -> None:
         """
