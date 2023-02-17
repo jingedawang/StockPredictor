@@ -195,6 +195,21 @@ Example for request http://stockprediction.org:5000/stock/600000/2022-04-29:
 	}
 }
 ```
+#### API 4: Top 5 recommendation
+```
+Url: /stock/top5
+Description: Recommend the best 5 stocks according to recent predictions.
+Parameter: None
+Response: A JSON string containing 5 stocks with its predicted increase ratio respectively.
+Example for request http://stockprediction.org:5000/stock/top5:
+[
+	{"id": "600241", "name": "ST时万", "increase": 0.2346},
+	{"id": "300003", "name": "乐普医疗", "increase": 0.2305},
+	{"id": "300567", "name": "精测电子", "increase": 0.226},
+	{"id": "000691", "name": "亚太实业", "increase": 0.2406},
+	{"id": "603617", "name": "君禾股份", "increase": 0.1879}
+]
+```
 
 ### Web App
 We also provide a web app to make this service convenient for users.

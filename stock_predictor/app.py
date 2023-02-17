@@ -164,6 +164,15 @@ def predict_in_date(id: str, date: str):
         return f'Error parameter: Stock {id} is invalid or not supported yet.'
     return result
 
+@app.route('/stock/top5')
+def get_top5():
+    """
+    Get the top 5 recommended stocks.
+
+    The top 5 recommended stocks are generated according to recent predictions.
+    """
+    return service.get_topN(5)
+
 @app.route('/stock/update')
 def update():
     """
