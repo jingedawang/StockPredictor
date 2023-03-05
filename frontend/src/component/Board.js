@@ -50,7 +50,7 @@ export function Board() {
         }
     },[])
     return (
-        <Card className='main'>
+        <Card className='board'>
             <Table columns={columns} dataSource={data}/>
         </Card>
     );
