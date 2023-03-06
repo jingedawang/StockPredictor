@@ -12,17 +12,19 @@ function App() {
     <div className="app">
       <Layout>
           <Header className='head'>Stock Prediction</Header>
-          <Content className='content'>
-            <Query />
-            <Board />
-          </Content>
-          <Sider className='sider'>
-            <Recommend />
-          </Sider>
-        <Footer className='footer'>
-          <span>Author @Yifan Zou</span>
-          <a href='mailto: wjg172184@163.com'>Email</a>
-          <a href='https://github.com/jingedawang/StockPredictor' target="_blank">GitHub</a>
+          <Layout>
+            <Content className='content'>
+              <Query />
+              <Board />
+            </Content>
+            <Sider width={300} className='sider'>
+              <Recommend />
+            </Sider>
+          </Layout>
+          <Footer className='footer'>
+            <span>Author @Yifan Zou</span>
+            <a href='mailto: wjg172184@163.com'>Email</a>
+            <a href='https://github.com/jingedawang/StockPredictor' target="_blank">GitHub</a>
         </Footer>
       </Layout>
     </div>

@@ -1,7 +1,6 @@
 @import '~antd/dist/antd.css';
 
 .main {
-    width: 100%;
     text-align: center;
 }
 
@@ -13,6 +12,6 @@
 
 #charts {
     margin: auto;
-    width: 80vw;
-    height: 60vh;
+    width: 60vw;
+    height: 45vh;
 }

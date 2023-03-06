@@ -1,7 +1,5 @@
 @import '~antd/dist/antd.css';
 
-.sider {
-    margin-top: 30px;
-    width: 336px;
+.recommend{
     height: 100%;
 }

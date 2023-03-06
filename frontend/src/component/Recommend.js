@@ -31,7 +31,7 @@ export function Recommend() {
         })
       },[]);
     return (
-        <Card className='sider' title="Recommend Top 5">
+        <Card className='recommend' title="Recommend Top 5">
             <Table columns={columns} dataSource={data} pagination={false} />
         </Card>
     );
