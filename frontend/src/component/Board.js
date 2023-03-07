@@ -1,7 +1,6 @@
 import { Card, Table, Tag } from 'antd';
 import React, { useEffect, useState } from 'react';
 
-import './Board.css';
 
 const columns = [
     {
@@ -50,7 +49,7 @@ export function Board() {
         }
     },[])
     return (
-        <Card className='main'>
+        <Card className='board'>
             <Table columns={columns} dataSource={data}/>
         </Card>
     );

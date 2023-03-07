@@ -6,19 +6,21 @@ html {
 }
 
 .head {
-  position: fixed;
   z-index: 1;
   width: 100%;
   color: aliceblue;
   font-weight: 500;
 }
 
+.sider {
+  background: rgba(0,0,0,0);
+}
+
 .content {
-  padding: 60px 0;
+  min-height: calc(100vh - 128px);
 }
 
 .footer {
-  position: fixed;
   bottom: 0;
   z-index: 1;
   height: 60px;
