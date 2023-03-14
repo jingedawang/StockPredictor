@@ -8,17 +8,19 @@ import { Recommend } from './component/Recommend'
 const { Header, Footer, Content, Sider } = Layout;
 
 function App() {
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  console.log(888, isMobile)
   return (
     <div className="app">
       <Layout>
           <Header className='head'>Stock Prediction</Header>
-          <Layout>
+          <Layout className='content-layout'>
             <Content className='content'>
               <Query />
               <Board />
             </Content>
-            <Sider width={300} className='sider'>
-              <Recommend />
+            <Sider className='sider'>
+              <Recommend/>
             </Sider>
           </Layout>
           <Footer className='footer'>

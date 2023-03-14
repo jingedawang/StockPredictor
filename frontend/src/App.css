@@ -16,10 +16,6 @@ html {
   background: rgba(0,0,0,0);
 }
 
-.content {
-  min-height: calc(100vh - 128px);
-}
-
 .footer {
   bottom: 0;
   z-index: 1;
@@ -30,4 +26,37 @@ html {
 
 .footer > * {
   margin: 10px;
+}
+
+
+@media screen and  (min-width: 960px) {
+  .content {
+    min-height: calc(100vh - 128px);
+  }
+
+  .sider {
+    flex: 0 0 300px !important;
+    max-width: 300px !important;
+    min-width: 300px !important;
+    width: 300px !important;
+  }
+}
+
+@media screen and  (max-width: 960px) {
+  .content-layout {
+    display: flex;
+    flex-direction: column !important;
+  }
+
+  .content {
+    width: 100vw !important;
+  }
+
+  .sider {
+    flex: 0 0 100vw !important;
+    max-width: 100vw !important;
+    min-width: 100vw !important;
+    width: 100vw !important;
+  }
+
 }
